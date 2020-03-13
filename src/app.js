@@ -8,6 +8,9 @@ const anatomyRouter = require('./anatomy-router')
 const catRouter = require('./cat-router')
 const frameworksRouter = require('./frameworks-router')
 const heroRouter = require('./hero-router')
+const projectsRouter = require('./projects-router')
+const charactersRouter = require('./characters-router')
+const scenesRouter = require('./scenes-router')
 
 const app = express()
 
@@ -21,6 +24,9 @@ app.use(anatomyRouter);
 app.use(catRouter);
 app.use(frameworksRouter);
 app.use(heroRouter);
+app.use(projectsRouter);
+app.use(charactersRouter);
+app.use(scenesRouter);
 
 app.use((error, req, res, next) => {
   let response;
