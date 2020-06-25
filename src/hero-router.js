@@ -7,10 +7,12 @@ const heroRouter = express.Router();
 const bodyParser = express.json();
 
 heroRouter
-  .route('/hero')
+  .route('/hero/:act')
   .get((req, res, next) => {
-    HeroService.getAllHeroSteps(req.app.get('db'))
+    const act = req.params
+    HeroService.getAllHeroStepsByAct(req.app.get('db'), act)
       .then(herosteps => {
+        console.log('herosteps', herosteps)
         res.json(herosteps)
       })
       .catch(next)

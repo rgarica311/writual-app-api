@@ -1,4 +1,4 @@
-insert into characters(user_id, project_name, name, age, gender, details)
+insert into characters(uid, project_name, name, age, gender, details)
 values
 ('hTbqcYvNe7dGhxXaphw3UEqNfep2', 'Seventeen West', 'Tara', 'mid 30s', 'Female', array['Bio', 'Want', 'Need']),
 ('hTbqcYvNe7dGhxXaphw3UEqNfep2', 'Seventeen West', 'Blake', '18', 'Male', array['Bio', 'Want', 'Need']),

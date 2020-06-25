@@ -7,9 +7,10 @@ const anatomyRouter = express.Router();
 const bodyParser = express.json();
 
 anatomyRouter
-  .route('/anatomy')
+  .route('/anatomy/:act')
   .get((req, res, next) => {
-    AnatomyService.getAllAnatomySteps(req.app.get('db'))
+    const act = req.params
+    AnatomyService.getAllAnatomySteps(req.app.get('db'), act)
       .then(anatomysteps => {
         res.json(anatomysteps)
       })

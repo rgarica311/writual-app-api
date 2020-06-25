@@ -1,6 +1,6 @@
 const AnatomyService = {
-  getAllAnatomySteps(knex) {
-    return knex.select('*').from('anatomy').orderBy('id', 'asc');
+  getAllAnatomySteps(knex, act) {
+    return knex.select('*').from('anatomy').where({act: act.act}).orderBy('id', 'asc');
   },
 }
 

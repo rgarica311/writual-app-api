@@ -1,6 +1,6 @@
 const CatService = {
-  getAllCatSteps(knex) {
-    return knex.select('*').from('cat').orderBy('id', 'asc');
+  getAllCatSteps(knex, act) {
+    return knex.select('*').from('cat').where({act: act.act}).orderBy('id', 'asc');
   },
 }
 

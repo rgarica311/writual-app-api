@@ -1,18 +1,20 @@
-create table projects (
-    id uuid primary key DEFAULT uuid_generate_v4 () UNIQUE,
+create table episodes (
+    id int primary key GENERATED ALWAYS AS IDENTITY,
     uid text references users(uid) not null,
-    title text, 
+    show_title text, 
+    project_id uuid references projects(id) ON DELETE CASCADE,
+    episode_title text,
     author text,
     logline text,
     genre text,
     projformat text,
     budget text,
     timeperiod text,
-    similarprojects text,
+    similarepisodes text,
     framework text,
+    bottle_episode text,
     visible boolean,
     show_hidden boolean,
     date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     shared boolean
 )
-

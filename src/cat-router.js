@@ -7,9 +7,10 @@ const catRouter = express.Router();
 const bodyParser = express.json();
 
 catRouter
-  .route('/cat')
+  .route('/cat/:act')
   .get((req, res, next) => {
-    CatService.getAllCatSteps(req.app.get('db'))
+    const act = req.params
+    CatService.getAllCatSteps(req.app.get('db'), act)
       .then(catsteps => {
         res.json(catsteps)
       })

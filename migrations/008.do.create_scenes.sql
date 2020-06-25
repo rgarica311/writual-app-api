@@ -1,10 +1,14 @@
 create table scenes (
 	id uuid primary key DEFAULT uuid_generate_v4 () UNIQUE,
-    user_id text references users(user_id) not null,
+    uid text references users(uid) not null,
     project_name text,
+    project_id uuid references projects(id) ON DELETE CASCADE,
     act text, 
+    step_name text, 
     scene_heading text,
     thesis text,
     antithesis text,
-    synthesis text
+    synthesis text,
+    shared text[]
+
 )
