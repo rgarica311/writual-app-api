@@ -81,7 +81,7 @@ usersRouter
       console.log(`episodeTitles in users router ${episodeTitles}`)
 
       console.log(`email in users router ${email}, projname ${projname}`)
-      if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com') {
+      if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com' || email === 'sashatomlinson16@gmail.com') {
         UserService.verifyUserExists(req.app.get('db'), email)
         .then(user => {
           console.log(`debug sharing: user after verify ${JSON.stringify(user)}`)

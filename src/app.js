@@ -21,6 +21,7 @@ const sharedProjectsRouter = require('./shared-projects-router')
 const sharedEpisodesRouter = require('./shared-episodes-router')
 const messagesRouter = require('./messages-router')
 const detailsRouter = require('./details-router')
+const treatmentsRouter = require('./treatment-router')
 const app = express()
 const admin = require('./firebaseAdmin');
 const bodyParser = express.json();
@@ -208,7 +209,7 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 
 app.use(session({
   secret: 'ssshhhhh', 
-  store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl : 260}),
+  store: new redisStore({ host: '192.168.0.13', port: 6379, client: client,ttl : 260}),
   resave: false, 
   saveUninitialized: false
   })
@@ -266,6 +267,7 @@ app.use(charactersRouter);
 app.use(scenesRouter);
 app.use(userRouter);
 app.use(detailsRouter);
+app.use(treatmentsRouter);
 
 
 app.use((error, req, res, next) => {
