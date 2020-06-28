@@ -78,6 +78,19 @@ io.on('connection', (client) => {
 
   })
 
+  client.on('scene-added', project_id => {
+    client.broadcast.emit('new-scene-added',  project_id)
+  })
+
+  client.on('new-character-added', project_id => {
+    client.broadcast.emit('new-character-added', project_id)
+  })
+
+  client.on('update-treatment', project_id => {
+    console.log('updated treatment', project_id)
+    client.broadcast.emit('update-treatment', project_id)
+  })
+
   client.on('check-unread-msgs', (uid, title) => {
     console.log('checking for unread messages....')
     MessagesService.getUnreadMessages(app.get('db'), uid, title)
@@ -216,16 +229,16 @@ app.use(session({
 );
 
 async function verifyId(req, res, next) {
-  console.log('verify id running')
+  //console.log('verify id running')
  
   if(req._parsedOriginalUrl !== undefined && req._parsedOriginalUrl.pathname !== '/socket.io/'){
     const idToken = req.headers.authorization
-    console.log('verify id idToken', idToken)
+    //console.log('verify id idToken', idToken)
     try {
       const decodedToken = await admin.auth().verifyIdToken(idToken)
       if(decodedToken){
-        console.log(`Decoded Token Success`)
-        console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
+        //console.log(`Decoded Token Success`)
+        //console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
         req.uid = decodedToken.user_id
       } else {
         console.log('Token Not Decoded')

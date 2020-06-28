@@ -74,8 +74,7 @@ scenesRouter
         console.log('newScene serialized in router', serializeScene(newScene))
         ScenesService.addScene(req.app.get('db'), serializeScene(newScene))
           .then(scene => {
-            console.log('scene', scene)
-            console.log(`Scene created with id ${scene.id}`)
+            
             res.status(201)
             .json(scene)
           })
