@@ -9,6 +9,7 @@ create table scenes (
     thesis text,
     antithesis text,
     synthesis text,
+    date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     shared text[]
 
 )

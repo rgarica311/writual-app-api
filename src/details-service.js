@@ -1,9 +1,9 @@
 const DetailsService = {
 
-    getDetail(knex, detail, character, proj){
-        console.log(`details getDetail service running: detail: ${detail.toLowerCase()} character: ${character} proj: ${proj}`)
-        console.log(`details get: ${knex.select(detail.toLowerCase()).from('details').where({character_name: character, proj_name: proj}).orderBy('date_created', 'desc').limit(1).returning('*')}`)
-        return knex.select(detail.toLowerCase()).from('details').where({character_name: character, proj_name: proj}).orderBy('date_created', 'desc').limit(1).returning('*').then(rows => {
+    getDetail(knex, detail, character, project_id){
+        //console.log(`details getDetail service running: detail: ${detail.toLowerCase()} character: ${character} proj: ${proj}`)
+        //console.log(`details get: ${knex.select(detail.toLowerCase()).from('details').where({character_name: character, proj_name: proj}).orderBy('date_created', 'desc').limit(1).returning('*')}`)
+        return knex.select(detail.toLowerCase()).from('details').where({character_name: character, project_id: project_id}).orderBy('date_created', 'desc').limit(1).returning('*').then(rows => {
             return rows[0]
         })
     },
@@ -17,14 +17,14 @@ const DetailsService = {
         })
     },
 
-    updateDetail(knex, detail, character, proj, raw){
+    updateDetail(knex, detail, character, project_id, raw){
         console.log(`details updateDetail service running typeof rawEditorData: ${typeof raw}`)
         return knex.raw(`update details
                          set ${detail} = '${JSON.stringify(raw)}'
                          where
                          character_name = '${character}'
                          and
-                         proj_name = '${proj}'`)
+                         project_id = '${project_id}'`)
     },
 
 }

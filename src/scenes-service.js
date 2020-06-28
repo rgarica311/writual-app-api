@@ -1,15 +1,15 @@
 const ScenesService = {
     
-    getProjectScenes(knex, proj, uid){
-        console.log(`scenes service params proj:${proj} uid:${uid}`)
-        return knex.select('id', 'uid', 'project_name', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({project_name: proj.replace(/"/g, "'"), uid: uid})
+    getProjectScenes(knex, project_id, uid){
+        console.log(`scenes service params proj:${project_id} uid:${uid}`)
+        return knex.select('id', 'uid', 'project_name', 'project_id', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({project_id: project_id, uid: uid})
     },
 
-    getSharedScenes(knex, uid, proj) {
+    getSharedScenes(knex, uid, project_id) {
         console.log('shared scenes service running uid:', uid)
-        console.log(`shared scenes service running proj: ${proj}`)
+        console.log(`shared scenes service running project_id: ${project_id}`)
         return knex.raw(`select id, uid, project_name, project_id, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes 
-                        where project_name = '${proj}' 
+                        where project_id = '${project_id}' 
                         and '${uid}' = any (shared)`)
             .then(obj => {
                 return obj.rows
@@ -54,6 +54,13 @@ const ScenesService = {
                             antithesis ilike '%${searchTerm}%'
                             or 
                             synthesis ilike '%${searchTerm}%'`)
+    },
+
+    getAllShared(knex, project_id) {
+        return knex.raw(`with arrays as (
+	                    select shared, array_length(shared, 1) from scenes where project_id = '${project_id}'
+                        ) 
+                        select shared from arrays order by array_length desc limit 1`)
     }
 
 }
