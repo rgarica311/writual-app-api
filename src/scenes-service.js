@@ -28,20 +28,20 @@ const ScenesService = {
         return knex('scenes').where({id: id, uid: uid}).delete()
     },
 
-    shareScenes(knex, uid, projectName, sharedUID) {
-        console.log(`shareScenes running: uid: ${uid}, projectName: ${projectName}, sharedUID: ${sharedUID}`)
+    shareScenes(knex, uid, project_id, sharedUID) {
+        console.log(`shareScenes running: uid: ${uid}, project_id: ${project_id}, sharedUID: ${sharedUID}`)
         return knex.raw(`UPDATE scenes 
                         SET shared = shared || '{${sharedUID}}' 
-                        where project_name = '${projectName}' 
+                        where project_id = '${project_id}' 
                         AND
                         uid = '${uid}'`)
     },
 
-    searchScenes(knex, uid, projectName, currentAct, currentStep, searchTerm) {
+    searchScenes(knex, uid, project_id, currentAct, currentStep, searchTerm) {
         return knex.raw(`select id, uid, project_name, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes
                             where uid = '${uid}'
                             and
-                            project_name = '${projectName}'
+                            project_id = '${project_id}'
                             and
                             act = '${currentAct}'
                             and 

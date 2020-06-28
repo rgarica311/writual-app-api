@@ -67,9 +67,9 @@ usersRouter
   })
 
   usersRouter
-    .route('/verify/user/:email/proj/:projname/:projformat/:message/:titles/:permission')
+    .route('/verify/user/:email/proj/:project_id/:projformat/:message/:titles/:permission')
     .get((req, res, next) => {
-      const { email, projname, projformat, message, titles, permission } = req.params
+      const { email, project_id, projformat, message, titles, permission } = req.params
       console.log(`titles in users router ${typeof titles}`)
       
       const uid  = req.uid
@@ -80,7 +80,7 @@ usersRouter
       }
       console.log(`episodeTitles in users router ${episodeTitles}`)
 
-      console.log(`email in users router ${email}, projname ${projname}`)
+      console.log(`email in users router ${email}, project_id ${project_id}`)
       if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com' || email === 'sashatomlinson16@gmail.com') {
         UserService.verifyUserExists(req.app.get('db'), email)
         .then(user => {
@@ -89,9 +89,9 @@ usersRouter
           console.log(`user[0].uid: ${user[0].uid}`)
           if(user[0].uid !== undefined && user[0].uid !== uid) {
             const sharedUID = user[0].uid 
-            ProjectsService.getProjectToShare(req.app.get('db'), uid, projname)
+            ProjectsService.getProjectToShare(req.app.get('db'), uid, project_id)
               .then(projectToShare => {
-                ProjectsService.setShared(req.app.get('db'), uid, projname)
+                ProjectsService.setShared(req.app.get('db'), uid, project_id)
                   .then(row => console.log(`row: ${JSON.stringify(row)}`))
                 console.log(`projectToShare ${JSON.stringify(projectToShare)}`)
                 if(projectToShare) {
@@ -191,7 +191,7 @@ usersRouter
                 }
               })
 
-            ScenesService.shareScenes(req.app.get('db'), uid, projname, sharedUID)
+            ScenesService.shareScenes(req.app.get('db'), uid, project_id, sharedUID)
                   .then(sharedScenes => {
                     res.json(sharedScenes)
                   })

@@ -100,12 +100,12 @@ scenesRouter
   })
 
   scenesRouter
-  .route('/scenes/:proj_name/:current_act/:current_step/:search_term')
+  .route('/scenes/:project_id/:current_act/:current_step/:search_term')
   .get((req, res, next) => {
     const { uid } = req
-    const { proj_name, current_act, current_step, search_term } = req.params
+    const { project_id, current_act, current_step, search_term } = req.params
     console.log(`scene search router req.params: ${JSON.stringify(req.params)}`)
-    ScenesService.searchScenes(req.app.get('db'), uid, proj_name, current_act, current_step, search_term)
+    ScenesService.searchScenes(req.app.get('db'), uid, project_id, current_act, current_step, search_term)
       .then(scenes => {
         console.log(`search results: ${JSON.stringify(scenes.rows)}`)
         res.json(scenes.rows)

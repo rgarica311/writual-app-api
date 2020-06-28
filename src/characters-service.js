@@ -1,17 +1,15 @@
 const CharactersService = {
 
-    getProjectCharacters(knex, proj, uid) {
+    getProjectCharacters(knex, project_id, uid) {
         console.log('get proj Characters running')
-        console.log('proj in getPorjectCharacters', proj.replace(/"/g, "'"))
         console.log(`user_id in getProjectCharacters ${uid}`)
-        return knex.select('id', 'name', 'age', 'gender', 'details').from('characters').where({project_name: proj.replace(/"/g, "'"), uid: uid})
+        return knex.select('id', 'project_name', 'project_id', 'name', 'age', 'gender', 'details').from('characters').where({project_id: project_id, uid: uid})
     },
 
-    getSharedCharacters(knex, uid, proj) {
+    getSharedCharacters(knex, uid, project_id) {    
         console.log('shared characters service running uid:', uid)
-        console.log('shared characters service running proj:', proj)
 
-        return knex.raw(`select id, name, age, gender, details from characters where project_name = '${proj}' and '${uid}' = any (shared)`)
+        return knex.raw(`select id, name, age, gender, details from characters where project_id = '${project_id}' and '${uid}' = any (shared)`)
             .then(obj => {
                 return obj.rows
             })
@@ -29,14 +27,21 @@ const CharactersService = {
         return knex('characters').where({id: id, uid: uid}).delete()
     },
 
-    shareCharacters(knex, uid, projectName, sharedUID) {
-        console.log(`shareCharacters running: uid: ${uid}, projectName: ${projectName}, sharedUID: ${sharedUID}`)
+    shareCharacters(knex, uid, project_id, sharedUID) {
+        console.log(`shareCharacters running: uid: ${uid}, project_id: ${project_id}, sharedUID: ${sharedUID}`)
         return knex.raw(`UPDATE characters 
                         SET shared = shared || '{${sharedUID}}' 
-                        where project_name = '${projectName}' 
+                        where project_id = '${project_id}' 
                         AND
                         uid = '${uid}'`)
-  },
+    },
+
+    getAllShared(knex, project_id) {
+        return knex.raw(`with arrays as (
+                         select shared, array_length(shared, 1) from characters where project_id = '${project_id}'
+        )
+        select shared from arrays order by array_length desc limit 1`)
+    }
 
   
 

@@ -8,14 +8,14 @@ const bodyParser = express.json();
 
 const serializeCharacter = character => ({
   id: character.id,
-  user_id: character.user_id,
   project_name: character.project_name,
+  uid: character.uid,
+  project_id: character.project_id,
   name: xss(character.name),
   age: xss(character.age),
   gender: xss(character.gender),
   details: character.details,
   shared: character.shared
-
 })
 
 charactersRouter
@@ -23,34 +23,47 @@ charactersRouter
   .post(bodyParser, (req, res, next) => {
     console.log('req.body', req.body)
     for(const field of ['project_name', 'name', 'age', 'gender', 'details']) {
-
       if(!req.body[field]) {
         logger.error(`${field} is required`)
         return res.status(400).send(`${field} is required`)
       } 
   
     }
-    const uid = req.uid
-    const { project_name, project_id, name, age, gender, details, shared } = req.body
-    const newChar = { uid, project_name, project_id, name, age, gender, details, shared }
-    console.log('newChar in router', newChar)
-    CharactersService.addCharacter(req.app.get('db'), newChar)
-      .then(character => {
-        res.status(201)
-        .json(serializeCharacter(character))
+    let { project_name, project_id, name, age, gender, details, uid, shared } = req.body
+    if(uid === null) {
+      uid = req.uid
+    }
+    CharactersService.getAllShared(req.app.get('db'), project_id)
+      .then(arrays => {
+        if(arrays.rows.length >0) {
+          arrays.rows[0].shared.map(uid => {
+            if(shared.includes(uid) !== true) {
+              shared.push(uid)
+            }
+          })
+        }
+        const newChar = { uid, project_name, project_id, name, age, gender, details, shared }
+        console.log('newChar in router', newChar)
+        CharactersService.addCharacter(req.app.get('db'), serializeCharacter(newChar))
+          .then(character => {
+            res.status(201)
+            .json(character)
+          })
+          .catch(next)
       })
       .catch(next)
+  
   })
 
   charactersRouter
-    .route('/characters/:proj')
+    .route('/characters/:project_id')
     .get((req, res, next) => {
       try {
-        const { proj } = req.params
-        CharactersService.getProjectCharacters(req.app.get('db'), proj, req.uid)
+        const { project_id } = req.params
+        CharactersService.getProjectCharacters(req.app.get('db'), project_id, req.uid)
           .then(characters => {
             if(!characters) {
-              console.log(`Character for project ${project} not found`)
+              console.log(`Character for project ${project_id} not found`)
               return res.status(404).json({
                 error:{message: 'Character not found' }
               })
@@ -65,15 +78,12 @@ charactersRouter
     })
 
   charactersRouter
-    .route('/shared/characters/:proj')
+    .route('/shared/characters/:project_id')
     .get((req, res, next) => {
       const { uid } = req
-      const { proj } = req.params
-      console.log('shared characters router accessed')
-      console.log(`proj in shared characters router: ${proj}`)
-      console.log(`JSON.stringify(proj) in shared characters router: ${JSON.stringify(proj)}`)
-
-      CharactersService.getSharedCharacters(req.app.get('db'), uid, proj)
+      const { project_id } = req.params
+      console.log('shared characters router accessed project_id', project_id)
+      CharactersService.getSharedCharacters(req.app.get('db'), uid, project_id)
         .then(sharedCharacters => {
           console.log('sharedCharacters', JSON.stringify(sharedCharacters))
           res.json(sharedCharacters)
