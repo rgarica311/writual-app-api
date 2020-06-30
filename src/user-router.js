@@ -141,7 +141,7 @@ usersRouter
                                 console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
                                 return clonedObj
                               }
-                              EpisodesService.getAllEpisodes(req.app.get('db'), uid, projname)
+                              EpisodesService.getAllEpisodes(req.app.get('db'), uid, project_id)
                                 .then(allEpisodes => {
                                   console.log(`allEpisodes: ${allEpisodes}`)
                                   allEpisodes.map(episode => 
@@ -193,10 +193,10 @@ usersRouter
 
             ScenesService.shareScenes(req.app.get('db'), uid, project_id, sharedUID)
                   .then(sharedScenes => {
-                    res.json(sharedScenes)
+                    //res.json(sharedScenes)
                   })
                   .catch(next)
-            CharactersService.shareCharacters(req.app.get('db'), uid, projname, sharedUID)
+            CharactersService.shareCharacters(req.app.get('db'), uid, project_id, sharedUID)
               .then(sharedCharacters => {
                 //res.json(sharedCharacters)
               })

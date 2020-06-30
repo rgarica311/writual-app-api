@@ -6,14 +6,14 @@ const  ProjectsService = {
     return knex('projects').where({uid: uid}).orderBy('date_created', 'dsc')
   },
 
-  getSharedWithUids(knex, uid, title, shared){
-    console.log(`getSharedWithUids service running uid: ${uid} title: ${title} shared: ${shared} type of shared: ${typeof shared}`)
+  getSharedWithUids(knex, uid, project_id, shared){
+    console.log(`getSharedWithUids service running uid: ${uid} project_id: ${project_id} shared: ${shared} type of shared: ${typeof shared}`)
     if(shared === 'false') {
       console.log('gSWUids false')
-      return knex.select('shared_with_uid').from('sharedprojects').where({shared_by_uid: uid, title: title})
+      return knex.select('shared_with_uid').from('sharedprojects').where({shared_by_uid: uid, id: project_id})
     } else {
       console.log('gSWUids true')
-      return knex.select('shared_by_uid').from('sharedprojects').where({shared_with_uid: uid, title: title})
+      return knex.select('shared_by_uid').from('sharedprojects').where({shared_with_uid: uid, id: project_id})
     }
   },
 
@@ -32,25 +32,25 @@ const  ProjectsService = {
     return queryStr
   },
 
-  getPhotoUrls(knex, id){
-    console.log('debug photourl: getPhotoUrls running id', ids )
+  /*getPhotoUrls(knex, id){
+    console.log('debug photourl: getPhotoUrls running id', id )
     return knex('users').where({uid: id})
-  },
+  },*/
 
   getSharedProjects(knex, uid) {
     console.log('projects service runnig: shared projects service running uid:', uid)
     return knex('projects').whereRaw(`'${uid}' = any (shared)`)
   },
 
-  setShared(knex, uid, proj) {
+  setShared(knex, uid, project_id) {
     console.log('set shared running')
-    return knex('projects').update({shared: true}).where({uid: uid, title: proj})
+    return knex('projects').update({shared: true}).where({uid: uid, id: project_id})
   },
 
-  getProjectToShare(knex, uid, proj) {
-    console.log('getProjectToShare runnig')
+  getProjectToShare(knex, uid, project_id) {
+    console.log('getProjectToShare runnig uid', uid)
     //setShared(knex, uid, proj)
-    return knex.select('id', 'title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarprojects', 'framework').from('projects').where({uid: uid, title: proj})
+    return knex.select('id', 'title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarprojects', 'framework').from('projects').where({uid: uid, id: project_id})
   },
 
   

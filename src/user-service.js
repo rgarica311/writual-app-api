@@ -4,6 +4,12 @@ const  UserService = {
     return knex.select('*').from('users')
   },
 
+  getUid(knex, email) {
+    console.log(`getUid service running email ${email}`)
+    return knex.select('uid').from('users').where({email: email})
+      .then(rows => {return rows[0]})
+  },
+
   addUser (knex, loggedInUser) {
     //console.log('loggedInUser in add user service', loggedInUser)
     return knex.insert(loggedInUser).into('users').returning('*')

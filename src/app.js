@@ -91,6 +91,15 @@ io.on('connection', (client) => {
     client.broadcast.emit('update-treatment', project_id)
   })
 
+  client.on('project-shared', email => {
+    console.log(`project shared ${email}`)
+    UserService.getUid(app.get('db'), email)
+      .then(uid => {
+        console.log('project shared uid returned:', uid)
+        client.broadcast.emit('project-shared', uid)
+      })
+  })
+
   client.on('check-unread-msgs', (uid, title) => {
     console.log('checking for unread messages....')
     MessagesService.getUnreadMessages(app.get('db'), uid, title)
