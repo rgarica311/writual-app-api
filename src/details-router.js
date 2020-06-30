@@ -19,7 +19,7 @@ detailsRouter
 detailsRouter
     .route('/details/existing/:detail/:character/:project_id')
     .post(bodyParser, (req, res, next) => {
-        console.log(`details details router accessed params: ${req.params}`)
+        console.log(`details details router accessed params: ${JSON.stringify(req.params)}`)
         const {detail, character, project_id} = req.params
         const newDetail = req.body
         console.log(`newDetail: ${newDetail}`)

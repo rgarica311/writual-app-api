@@ -86,6 +86,11 @@ io.on('connection', (client) => {
     client.broadcast.emit('new-character-added', project_id)
   })
 
+  client.on('update-detail', project_id => {
+    console.log('update-detail running', project_id)
+    client.broadcast.emit('update-detail', project_id)
+  })
+
   client.on('update-treatment', project_id => {
     console.log('updated treatment', project_id)
     client.broadcast.emit('update-treatment', project_id)
