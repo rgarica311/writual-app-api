@@ -1,6 +1,7 @@
 create table shared_episodes (
-    id int primary key GENERATED ALWAYS AS IDENTITY,
-    episode_num int references episodes(id),
+    uni_id uuid primary key DEFAULT uuid_generate_v4 () UNIQUE,
+    id uuid references episodes(id) ON DELETE CASCADE,
+    episode_num text,
     show_title text,
     project_id uuid references projects(id) ON DELETE CASCADE,
     episode_title text,

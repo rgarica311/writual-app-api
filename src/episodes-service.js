@@ -15,10 +15,9 @@ const EpisodesService = {
     },
 
     getEpisodeToShare(knex, uid, episodeTitle) {
+        console.log(`episodes service running getEpisodeToShare: ${episodeTitle}`)
         knex('episodes').update({shared: true}).where({uid: uid, show_title: episodeTitle})
-
-        console.log('episodes service runnig: ')
-        return knex.select('show_title', 'project_id', 'episode_title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({uid: uid, episode_title: episodeTitle})
+        return knex.select('id', 'show_title', 'project_id', 'episode_title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({uid: uid, episode_title: episodeTitle})
     },
 
     shareEpisode(knex, epToShare) {
@@ -28,8 +27,9 @@ const EpisodesService = {
             })
     },
 
-    getAllEpisodes(knex, uid, projname) {
-        return knex.select('show_title', 'episode_title', 'author', 'logline', 'genre', 'projformat','budget', 'timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({show_title: projname, uid: uid })
+    getAllEpisodes(knex, uid, project_id) {
+        console.log('getAll Episodes running')
+        return knex.select('id', 'uid', 'show_title', 'episode_title', 'project_id', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({project_id: project_id, uid: uid }).orderBy('date_created', 'dsc')
     },
 
     shareAllEpisodes(knex, uid, showTitle, sharedUID) {
@@ -44,7 +44,7 @@ const EpisodesService = {
 
     getEpisodes(knex, uid, title) {
         console.log(`get episodes running uid: ${uid} title: ${title}`)
-        return knex('episodes').where({uid: uid})
+        return knex('episodes').where({uid: uid }).orderBy('date_created', 'dsc')
                  
     }, 
 

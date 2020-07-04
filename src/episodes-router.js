@@ -18,11 +18,11 @@ const serializeEpisode = episode => ({
 })
 
 episodesRouter 
-    .route('/episodes/:title')
+    .route('/episodes')
     .get((req, res, next) => {
         const { uid } = req
         const { title } = req.params
-        console.log('get episodes router running')
+        console.log('get episodes router runnin uid', uid)
         EpisodesService.getEpisodes(req.app.get('db'), uid, title)
             .then(episodes => {
                 res.json(episodes)
@@ -52,7 +52,7 @@ episodesRouter
         .then(episode => {
             console.log(`Episode created with id ${episode.id}`)
             res.status(201)
-            .json(serializeEpisode(episode))
+            .json(episode)
         })
         .catch(next)
     })

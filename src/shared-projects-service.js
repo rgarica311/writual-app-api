@@ -11,7 +11,7 @@ const SharedProjectsService = {
     },
 
     shareProject(knex, projToShare) {
-        
+        console.log('debug share project: shareProjec Service running')
         return knex.insert(projToShare).into('sharedprojects').returning('*')
             .then(rows => {
                 return rows[0]

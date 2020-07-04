@@ -109,7 +109,7 @@ io.on('connection', (client) => {
     console.log('checking for unread messages....')
     MessagesService.getUnreadMessages(app.get('db'), uid, title)
       .then(messages => {
-        //console.log(`debug chat getUnreadMessages, messages: ${JSON.stringify(messages)}`)
+        console.log(`debug chat getUnreadMessages, messages: ${JSON.stringify(messages)}`)
         if(messages.length > 0) {
           messages.map(msg => {
             client.emit('check-unread-msgs', true, messages.length, title, msg.sender_uid)

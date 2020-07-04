@@ -6,6 +6,7 @@ create table projects (
     logline text,
     genre text,
     projformat text,
+    has_episodes boolean,
     budget text,
     timeperiod text,
     similarprojects text,
@@ -14,5 +15,6 @@ create table projects (
     show_hidden boolean,
     date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     shared boolean
+
 )
 

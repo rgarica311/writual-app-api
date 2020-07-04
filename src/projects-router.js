@@ -73,9 +73,9 @@ projectsRouter
   })
 
 projectsRouter
-  .route('/projects/iconurls/:project_id/:shared')
+  .route('/projects/iconurls/:project_id/:shared/:episode')
   .get((req, res, next) => {
-    const { project_id, shared } = req.params
+    const { project_id, shared, episode } = req.params
     //console.log(`getIconUrls router title ${title} shared: ${shared} type of shared: ${typeof shared}`)
     const { uid } = req
     const photoUrls = []
@@ -85,7 +85,7 @@ projectsRouter
     console.log('debug photourl: uid in projects router get', uid)
     //console.log('debug photourl: title in projects router get', title)
 
-    ProjectsService.getSharedWithUids(req.app.get('db'), req.uid, project_id, shared)
+    ProjectsService.getSharedWithUids(req.app.get('db'), req.uid, project_id, shared, episode)
     .then(sharedWithUids => {
       console.log(`sharedWithUids: ${JSON.stringify(sharedWithUids)}`)
       sharedWithUids.map(obj => {
