@@ -50,24 +50,29 @@ const serializeMessage = msg => ({
     sender_uid: msg.sender_uid,
     recipient_uid: msg.recipient_uid,
     message: xss(msg.message),
+    project_id: msg.project_id,
+    uni_id: msg.uni_id,
     proj: msg.proj,
     socket_available: msg.socket_available,
     date_created: msg.date_created
 })
 
-io.on('connection', (client) => {
+io.on('connect', (client) => {
   let scrollCount = 0
   let limit = 10
   //console.log(`debug private message: on connection client, getAuthToken ${Object.keys(client.conn)}`)
-  let _uid, _email, _title
-  client.on('uid', (uid, title, email, recipient_uid) => {
+  let _uid, _email, _title, _uni_id
+
+  client.on('uid', (uid, title, uni_id,  email, recipient_uid) => {
     _uid = uid
     _title = title
     _email = email
+    _uni_id = uni_id
     
     //console.log(`debug private message: client.on 'uid', uid: ${uid}`)
     const socketPairs = {
       uid: uid,
+      uni_id: uni_id,
       recipient_uid: recipient_uid,
       socketId: client.id,
       title: title,
@@ -78,8 +83,8 @@ io.on('connection', (client) => {
 
   })
 
-  client.on('scene-added', project_id => {
-    client.broadcast.emit('new-scene-added',  project_id)
+  client.on('scene-added', (project_id, isEpisode) => {
+    client.broadcast.emit('new-scene-added',  project_id, isEpisode)
   })
 
   client.on('new-character-added', project_id => {
@@ -87,50 +92,59 @@ io.on('connection', (client) => {
   })
 
   client.on('update-detail', project_id => {
-    console.log('update-detail running', project_id)
+    //console.log('update-detail running', project_id)
     client.broadcast.emit('update-detail', project_id)
   })
 
   client.on('update-treatment', project_id => {
-    console.log('updated treatment', project_id)
+    //console.log('updated treatment', project_id)
     client.broadcast.emit('update-treatment', project_id)
   })
 
   client.on('project-shared', email => {
-    console.log(`project shared ${email}`)
+    //console.log(`project shared ${email}`)
     UserService.getUid(app.get('db'), email)
       .then(uid => {
-        console.log('project shared uid returned:', uid)
+        //console.log('project shared uid returned:', uid)
         client.broadcast.emit('project-shared', uid)
       })
   })
 
-  client.on('check-unread-msgs', (uid, title) => {
-    console.log('checking for unread messages....')
-    MessagesService.getUnreadMessages(app.get('db'), uid, title)
-      .then(messages => {
-        console.log(`debug chat getUnreadMessages, messages: ${JSON.stringify(messages)}`)
-        if(messages.length > 0) {
-          messages.map(msg => {
-            client.emit('check-unread-msgs', true, messages.length, title, msg.sender_uid)
-          })
-        } else {
-          //console.log(`check unread msgs emit false`)
-          client.emit('check-unread-msgs', false, title)
-        }
-      })
+  client.on('check-unread-msgs', (unreadArgs) => {
+
+    //console.log('refactor unread: checking for unread messages unreadArgs', unreadArgs)
+    let promisesToResolve = []
+    unreadArgs.forEach(argSet => {
+      promisesToResolve.push(MessagesService.getUnreadMessages(app.get('db'), argSet))
+    })
+
+    Promise.all(promisesToResolve)
+    .then(projStatus => {
+      try {
+        client.emit('check-unread-msgs', projStatus) //figure out why not broadcasting
+      }
+      catch (error) {
+        //console.error('error emitting unread msgs:', error)
+      }
+      //console.log(`refactor unread: projStatus: ${JSON.stringify(projStatus)}`)
+      
+    }).catch((error) => {
+        let errorMsg = 'Could not fetch unread messages'
+        //console.error(errorMsg, error)
+    })
+  
   })
 
-  client.on('get-initial-messages', (title, uid, recipient_uid) => {
-    console.log(`debug chat get initial messages running: title, ${title}, uid: ${uid}, recipient_uid: ${recipient_uid}`)
+  client.on('get-initial-messages', (title, project_id, uni_id, uid, recipient_uid) => {
+    //console.log(`debug chat get initial messages running: title, ${title}, uid: ${uid}, recipient_uid: ${recipient_uid}`)
     /*if(!titles.includes(title)){
       titles.push(title)
-      console.log(`run getInitialMessages`)
+      //console.log(`run getInitialMessages`)
     }*/
-    MessagesService.getInitialMessages(app.get('db'), uid, title, recipient_uid)
+    MessagesService.getInitialMessages(app.get('db'), uid, uni_id, recipient_uid, project_id)
     .then(messages => {
       messages = messages.rows.reverse()
-      //console.log(`debug chat: messages.rows, ${JSON.stringify(messages)}`)
+      console.log(`debug chat: messages.rows, ${JSON.stringify(messages)}`)
       client.emit('get-initial-messages', messages)
     })
 
@@ -138,15 +152,18 @@ io.on('connection', (client) => {
       .then(rowsAffected => console.log(JSON.stringify(rowsAffected)))
   })
 
-  client.on(`new-private-msg`, async (title, message, email, recipient_uid, sender_uid) => {
+  client.on(`new-private-msg`, async (title, project_id, uni_id, message, email, recipient_uid, sender_uid) => {
     let senderSocket
     const msg = {
           sender_uid: sender_uid,
           recipient_uid: recipient_uid,
           message: message,
           proj: title,
-          socket_available: sockets.find(socket => socket.uid === recipient_uid) !== undefined ? true : false
+          project_id: project_id,
+          uni_id: uni_id,
+          socket_available: sockets.find(socket => socket.uid === recipient_uid && socket.title === title) !== undefined ? true : false
     }
+    console.log(`debug new msg: ${JSON.stringify(msg)}`)
 
     MessagesService.postMessage(app.get('db'), serializeMessage(msg))
 
@@ -162,7 +179,7 @@ io.on('connection', (client) => {
       sockets.find(socket => {
         if(socket.uid === recipient_uid && socket.title === title) {
           recipientSocket = socket.socketId
-          console.log(`recipientSocket ${recipientSocket}`)
+          //console.log(`recipientSocket ${recipientSocket}`)
         }
       })
       io.to(recipientSocket).emit(`${title}`, msg)
@@ -172,21 +189,21 @@ io.on('connection', (client) => {
     
   })
 
-  client.on(`load-on-scroll`, (title, uid, recipient_uid) => {
+  client.on(`load-on-scroll`, (uni_id, uid, recipient_uid) => {
     limit += 5
-    console.log(`load-on-scroll runnning limit: ${limit}`)
-    MessagesService.getNextMessages(app.get('db'), title, uid, limit, recipient_uid )
+    //console.log(`load-on-scroll runnning limit: ${limit}`)
+    MessagesService.getNextMessages(app.get('db'), uni_id, uid, limit, recipient_uid )
     .then(messages => {
-      console.log(`chat messages.rows loaded on scroll: ${JSON.stringify(messages.rows)}`)
+      //console.log(`chat messages.rows loaded on scroll: ${JSON.stringify(messages.rows)}`)
       if(sockets.find(socket => socket.recipient_uid === recipient_uid) !== undefined) {
-        console.log('load-on-scroll found socket')
+        //console.log('load-on-scroll found socket')
         let recipientSocket
-        console.log(`sockets: ${JSON.stringify(sockets)}`)
+        //console.log(`sockets: ${JSON.stringify(sockets)}`)
         sockets.find(socket => {
-          if(socket.recipient_uid === recipient_uid && socket.title === title) {
+          if(socket.recipient_uid === recipient_uid && socket.uni_id === uni_id) {
             recipientSocket = socket.socketId
             io.to(recipientSocket).emit('send-old-messages', messages.rows)
-            console.log(`recipientSocket ${recipientSocket}`)
+            //console.log(`recipientSocket ${recipientSocket}`)
           }
         })
       } 
@@ -194,13 +211,13 @@ io.on('connection', (client) => {
     })
   })
 
-  client.on('close-chat-window', function (uid, title, email) {
+  client.on('close-chat-window', function (uid, title, uni_id, email) {
     //console.log(`on disconnect uid: ${uid}, title: ${title}, email: ${email}`)
     sockets.find(socket => {
       //console.log(`closec-chat-window socket: ${JSON.stringify(socket)}`)
       //console.log(`on diconnect: ${socket.uid} === ${this.uid} && ${socket.title} === ${title} && ${socket.email} === ${email}`)
       if(socket !== undefined) {
-          if(socket.uid === uid && socket.title === title && socket.email === email) {
+          if(socket.uid === uid && socket.title === title && socket.email === email && socket.uni_id === uni_id) {
             sockets.splice(sockets.indexOf(socket), 1)
         }
       }
@@ -255,7 +272,7 @@ async function verifyId(req, res, next) {
         //console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
         req.uid = decodedToken.user_id
       } else {
-        console.log('Token Not Decoded')
+        //console.log('Token Not Decoded')
       }
       return next()
     } catch(e) {
@@ -267,7 +284,7 @@ async function verifyId(req, res, next) {
       try {
       const decodedToken = await admin.auth().verifyIdToken(idToken)
       if(decodedToken){
-        console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
+        //console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
         return decodedToken.user_id
       }
     } catch(e) {

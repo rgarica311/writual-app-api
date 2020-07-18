@@ -17,19 +17,34 @@ const EpisodesService = {
     getEpisodeToShare(knex, uid, episodeTitle) {
         console.log(`episodes service running getEpisodeToShare: ${episodeTitle}`)
         knex('episodes').update({shared: true}).where({uid: uid, show_title: episodeTitle})
-        return knex.select('id', 'show_title', 'project_id', 'episode_title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({uid: uid, episode_title: episodeTitle})
+        return knex.select('uni_id', 'show_title', 'project_id', 'episode_title', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({uid: uid, episode_title: episodeTitle})
     },
 
-    shareEpisode(knex, epToShare) {
-        return knex.insert(epToShare).into('shared_episodes').returning('*')
-            .then(rows => {
-                return rows[0]
-            })
+    async shareEpisode(knex, epToShare, count) {
+        console.log(`shareEpisode service running ${count} time(s) epToShare: ${JSON.stringify(epToShare)}`)
+        let sharedEpisodes = await knex('episode_title', 'shared_by_uid', 'shared_with_uid').from('shared_episodes').where({shared_by_uid: epToShare.shared_by_uid})
+        console.log(`sharedEpisodes: ${JSON.stringify(sharedEpisodes)}`)
+        const compareObjects = (obj1, obj2) => {
+            console.log(`compare episode pbjects: obj1: ${JSON.stringify(obj1)} obj2: ${JSON.stringify(obj2)}`)
+            return obj1.episode_title === obj2.episode_title && obj1.shared_by_uid === obj2.shared_by_uid && obj1.shared_with_uid === obj2.shared_with_uid
+        }
+        const episodeExists = []
+        sharedEpisodes.forEach(ep => {
+            episodeExists.push(compareObjects(ep, epToShare))
+        })
+        console.log(`debug project share: episodeExists ${episodeExists}`)
+        if(!episodeExists.includes(true)) {
+            return knex.insert(epToShare).into('shared_episodes').returning('*')
+                .then(rows => {
+                    return rows[0]
+                })
+        }
+        
     },
 
     getAllEpisodes(knex, uid, project_id) {
         console.log('getAll Episodes running')
-        return knex.select('id', 'uid', 'show_title', 'episode_title', 'project_id', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode').from('episodes').where({project_id: project_id, uid: uid }).orderBy('date_created', 'dsc')
+        return knex.select('uni_id', 'uid', 'show_title', 'episode_title', 'project_id', 'author', 'logline', 'genre', 'projformat','budget','timeperiod', 'similarepisodes', 'framework', 'bottle_episode', 'shared').from('episodes').where({project_id: project_id, uid: uid }).orderBy('date_created', 'dsc')
     },
 
     shareAllEpisodes(knex, uid, showTitle, sharedUID) {
@@ -88,6 +103,16 @@ const EpisodesService = {
         console.log('episodes service runnig: ')
         return knex('episodes').where({uid: uid, visible: false})
     },
+
+    setShared(knex, uid, uni_id) {
+        console.log(`set shared running uid ${uid} uni_id ${uni_id}`)
+        return knex('episodes').update({shared: true}).where({uid: uid, uni_id: uni_id})
+    },
+
+    getPermission(knex, project_id) {
+        console.log(`getPermission service ${project_id}`)
+        return knex.select('permission').from('sharedprojects').where({id: project_id})
+    }
 
     
 

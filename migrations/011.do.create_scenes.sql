@@ -3,6 +3,7 @@ create table scenes (
     uid text references users(uid) not null,
     project_name text,
     project_id uuid references projects(id) ON DELETE CASCADE,
+    episode_id uuid references episodes(uni_id) on delete cascade, 
     act text, 
     step_name text, 
     scene_heading text,

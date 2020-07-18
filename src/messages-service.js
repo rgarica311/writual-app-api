@@ -1,9 +1,14 @@
 
 const  MessagesService = {
 
-    getUnreadMessages(knex, uid, title) {
+    getUnreadMessages(knex, argSet) {
+        //console.log(`refactor unread: getUnreadMessages argSet ${argSet} argset[0]: ${argSet[0]}`)
+        return new Promise((resolve, reject) => {
+            resolve(knex('messages').where({recipient_uid: argSet[0], socket_available: false, proj: argSet[1]}))
+                
+        })
         //console.log(`debug chat getUnreadMessages running`)
-        return knex('messages').where({recipient_uid: uid, socket_available: false, proj: title})
+        
     },
 
     setRead(knex, uid) {
@@ -16,8 +21,8 @@ const  MessagesService = {
         return knex.select('id').from('messages').where({sender_uid: uid, proj, title}).orWhere({recipient_uid: uid, proj: title}).orderBy('id', 'dsc').limit(1)
     },
 
-    getInitialMessages(knex, uid, title, recipient_uid) {
-        //console.log(`debug chat: get initial messages service running uid: ${uid}, title: ${title}`)
+    getInitialMessages(knex, recipient_uid, uni_id, uid, project_id) {
+        //console.log(`debug chat: get initial messages service running uid: ${uid}, uni_id: ${uni_id}, recipient_uid: ${recipient_uid}`)
         /*return knex.with('msg_alias', (qb) => {
             qb.select('*').from('messages').where(function () {
                     this
@@ -25,11 +30,13 @@ const  MessagesService = {
                         .orWhere({recipient_uid: uid, proj: title}).limit(300).orderBy('date_created', 'dsc') })
         }).select('*').from('msg_alias')*/
         //return knex('messages').where({sender_uid: uid, proj: title}).orWhere({recipient_uid: uid, proj: title}).orderBy('date_created', 'dsc').limit(7)
-        return knex.raw(`select * from messages 
+        if(uni_id !== null) {
+            //console.log(`uni_id !== null: ${uni_id}`)
+            return knex.raw(`select * from messages 
                          where 
                          sender_uid = '${uid}'
                          and 
-                         proj = '${title}'
+                         uni_id = '${uni_id}'
                          and
                          recipient_uid = '${recipient_uid}'
                          or 
@@ -37,20 +44,40 @@ const  MessagesService = {
                          and 
                          sender_uid = '${recipient_uid}'
                          and
-                         proj = '${title}'
+                         uni_id = '${uni_id}'
                          order by 
                          date_created desc
                          limit 10`)
+        } else {
+            //console.log(`uni_id === null: ${uni_id}`)
+            return knex.raw(`select * from messages 
+                         where 
+                         sender_uid = '${uid}'
+                         and 
+                         project_id = '${project_id}'
+                         and
+                         recipient_uid = '${recipient_uid}'
+                         or 
+                         recipient_uid = '${uid}'
+                         and 
+                         sender_uid = '${recipient_uid}'
+                         and
+                         project_id = '${project_id}'
+                         order by 
+                         date_created desc
+                         limit 10`)
+        }
+        
            
     },
 
-    getNextMessages(knex, title, uid, limit, recipient_uid) {
+    getNextMessages(knex, uni_id, uid, limit, recipient_uid) {
         //console.log(`get next messages running uid: ${uid}, title: ${title}, limit: ${limit}`)
         return knex.raw(`select * from messages 
                          where 
                          sender_uid = '${uid}'
                          and 
-                         proj = '${title}'
+                         project_id = '${uni_id}'
                          and
                          recipient_uid = '${recipient_uid}'
                          or 
@@ -58,7 +85,7 @@ const  MessagesService = {
                          and 
                          sender_uid = '${recipient_uid}'
                          and
-                         proj = '${title}'
+                         project_id = '${uni_id}'
                          order by 
                          date_created desc
                          limit ${limit}`)
@@ -69,6 +96,7 @@ const  MessagesService = {
     },
 
     postMessage(knex, message) {
+        console.log(`post message: ${message}`)
         knex.insert(message).into('messages').returning('*')
             .then(rows => {
                 return rows[0]

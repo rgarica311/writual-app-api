@@ -5,7 +5,7 @@ const  UserService = {
   },
 
   getUid(knex, email) {
-    console.log(`getUid service running email ${email}`)
+    //console.log(`getUid service running email ${email}`)
     return knex.select('uid').from('users').where({email: email})
       .then(rows => {return rows[0]})
   },

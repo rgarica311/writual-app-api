@@ -33,7 +33,7 @@ const SharedEpisodesService = {
 
      getSharedEpisodes(knex, uid) {
         console.log('shared_episodes service runnig: shared shared_episodes service running uid:', uid)
-        return knex('shared_episodes').where({shared_with_uid: uid})
+        return knex('shared_episodes').where({shared_with_uid: uid}).orderBy('date_created', 'dsc')
     },
 
     getHiddenSharedEpisodes(knex, uid){

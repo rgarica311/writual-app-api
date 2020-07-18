@@ -27,13 +27,21 @@ const CharactersService = {
         return knex('characters').where({id: id, uid: uid}).delete()
     },
 
-    shareCharacters(knex, uid, project_id, sharedUID) {
+    async shareCharacters (knex, uid, project_id, sharedUID, title) {
         console.log(`shareCharacters running: uid: ${uid}, project_id: ${project_id}, sharedUID: ${sharedUID}`)
-        return knex.raw(`UPDATE characters 
+        let result = await knex.select('shared').from('characters').where({project_id: project_id, uid: uid})
+        console.log(`shareCharacters running shared: ${JSON.stringify(result)}`)
+        let prevSharedUID = result[0].shared[0]
+        if(prevSharedUID !== sharedUID) {
+            return knex.raw(`UPDATE characters 
                         SET shared = shared || '{${sharedUID}}' 
                         where project_id = '${project_id}' 
                         AND
+                        project_name = '${title}'
+                        AND
                         uid = '${uid}'`)
+        }
+        
     },
 
     getAllShared(knex, project_id) {

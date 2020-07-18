@@ -10,12 +10,26 @@ const SharedProjectsService = {
         return knex('sharedprojects').where({shared_with_uid: uid})
     },
 
-    shareProject(knex, projToShare) {
-        console.log('debug share project: shareProjec Service running')
-        return knex.insert(projToShare).into('sharedprojects').returning('*')
-            .then(rows => {
-                return rows[0]
-            })
+   async shareProject(knex, projToShare) {
+        console.log(`debug share project: shareProject Service running: ${JSON.stringify(projToShare)}`)
+        let sharedProjects  = await knex.select('id', 'shared_by_uid', 'shared_with_uid').from('sharedprojects').where({shared_by_uid: projToShare[0].shared_by_uid})
+        console.log(`debug share project shareProject service result: ${JSON.stringify( sharedProjects)}`)
+        //let sharedProjects = result[0]
+        const compareObjects = (obj1, obj2) => {
+            return obj1.id === obj2.id && obj1.shared_by_uid === obj2.shared_by_uid && obj1.shared_with_uid === obj2.shared_with_uid
+        }
+        const projectExists = []
+        sharedProjects.forEach(prj => {
+            projectExists.push(compareObjects(prj, projToShare[0]))
+        })
+        console.log(`debug project share: projectExists ${projectExists}`)
+        if(!projectExists.includes(true)) {
+            return knex.insert(projToShare[0]).into('sharedprojects').returning('*')
+                .then(rows => {
+                    return rows[0]
+                })
+        }
+        
     },
 
     hideSharedProject(knex, proj, uid) {

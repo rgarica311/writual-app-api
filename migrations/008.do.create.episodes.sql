@@ -1,5 +1,5 @@
 create table episodes (
-    id uuid primary key DEFAULT uuid_generate_v4 () UNIQUE,
+    uni_id uuid primary key DEFAULT uuid_generate_v4 () UNIQUE,
     uid text references users(uid) not null,
     show_title text, 
     project_id uuid references projects(id) ON DELETE CASCADE,
