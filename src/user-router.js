@@ -276,34 +276,47 @@ usersRouter
         next()
       },
       (req, res, next) => {
-        res.locals.episodeTitles.map(title => {
+        if(res.locals.episodeTitles.length > 0) {
+          res.locals.episodeTitles.map(title => {
+            try {
+              ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
+                .then(rows => {
+                  //console.log(`rows updated: ${rows}`)
+                })
+              
+            } catch (err) {
+                console.error(`error sharing scenes: ${err}`)
+            }
 
-          try {
-            ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
-              .then(rows => {
-                //console.log(`rows updated: ${rows}`)
-              })
-            next()
-          } catch (err) {
-              console.error(`error sharing scenes: ${err}`)
-          }
+            try {
+              CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, title)
+                .then(rows => {
+                  //console.log(`rows updated: ${rows}`)
+                })
+              res.status(200).send()
+            } catch (err) {
+                console.error(`error sharing characters: ${err}`)
+            }
 
-          try {
-            CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, title)
-              .then(rows => {
-                //console.log(`rows updated: ${rows}`)
-              })
-            res.status(200).send()
-          } catch (err) {
-              console.error(`error sharing characters: ${err}`)
-          }
-
-        })
+          })
+        } else {
+          next()
+        }
+        
         
         
       },
       (req, res, next) => {
-        /*try {
+        try {
+          ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
+            .then(rows => {
+              //console.log(`rows updated: ${rows}`)
+            })
+          
+        } catch (err) {
+            console.error(`error sharing scenes: ${err}`)
+        }
+        try {
           CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID)
             .then(rows => {
               //console.log(`rows updated: ${rows}`)
@@ -311,7 +324,7 @@ usersRouter
           res.status(200).send()
         } catch (err) {
           console.error(`error sharing characters: ${err}`)
-        }*/
+        }
         
     })
         

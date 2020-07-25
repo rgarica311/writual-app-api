@@ -5,6 +5,7 @@ create table messages (
     message text, 
     proj text,
     project_id uuid references projects(id) ON DELETE CASCADE,
+    episode_id uuid references episodes(uni_id) ON DELETE CASCADE,
     uni_id text, 
     socket_available boolean, 
     date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 

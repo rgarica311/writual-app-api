@@ -29,11 +29,11 @@ charactersRouter
       } 
   
     }
-    let { project_name, project_id, name, age, gender, details, uid, shared } = req.body
+    let { project_name, project_id, episode_id, name, age, gender, details, uid, shared } = req.body
     if(uid === null) {
       uid = req.uid
     }
-    CharactersService.getAllShared(req.app.get('db'), project_id)
+    CharactersService.getAllShared(req.app.get('db'), project_id, episode_id)
       .then(arrays => {
         if(arrays.rows.length >0) {
           arrays.rows[0].shared.map(uid => {

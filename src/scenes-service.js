@@ -74,8 +74,6 @@ const ScenesService = {
                                 SET shared = shared || '{${sharedUID}}' 
                                 where project_id = '${project_id}' 
                                 AND
-                                project_name = '${title}'
-                                AND
                                 uid = '${uid}'`)
 
                 } catch (err) {
@@ -105,11 +103,20 @@ const ScenesService = {
                             synthesis ilike '%${searchTerm}%'`)
     },
 
-    getAllShared(knex, project_id) {
-        return knex.raw(`with arrays as (
+    getAllShared(knex, project_id, episode_id) {
+        console.log(`scenes getAllShared projectID: ${project_id} episode_id: ${episode_id} typeof episode_id: ${typeof episode_id}`)
+        if(episode_id !== null) {
+            return knex.raw(`with arrays as (
+	                    select shared, array_length(shared, 1) from scenes where episode_id = '${episode_id}'
+                        ) 
+                        select shared from arrays order by array_length desc limit 1`)
+        } else {
+            return knex.raw(`with arrays as (
 	                    select shared, array_length(shared, 1) from scenes where project_id = '${project_id}'
                         ) 
                         select shared from arrays order by array_length desc limit 1`)
+        }
+        
     }
 
 }

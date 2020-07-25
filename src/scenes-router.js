@@ -66,13 +66,8 @@ scenesRouter
       console.log(`sharee: uid in in if: ${uid}`)
     } 
     console.log(`sharee: uid after if: ${uid}`)
-    let id
-    if(project_id) {
-      id = project_id
-    } else {
-      id = episode_id
-    }
-    ScenesService.getAllShared(req.app.get('db'), id)
+    
+    ScenesService.getAllShared(req.app.get('db'), project_id, episode_id)
       .then(arrays => {
         if(arrays.rows.length > 0) {
           console.log( `sharee arrays: ${JSON.stringify(arrays.rows[0].shared)}`)

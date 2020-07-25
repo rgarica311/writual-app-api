@@ -15,5 +15,6 @@ create table SharedProjects (
     show_hidden boolean,
     shared_by_uid text references users(uid) not null,
     shared_with_uid text references users(uid) not null,
-    permission text
+    permission text,
+    date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 )

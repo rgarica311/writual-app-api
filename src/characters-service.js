@@ -28,11 +28,14 @@ const CharactersService = {
     },
 
     async shareCharacters (knex, uid, project_id, sharedUID, title) {
-        console.log(`shareCharacters running: uid: ${uid}, project_id: ${project_id}, sharedUID: ${sharedUID}`)
+        console.log(`shareCharacters running: uid: ${uid}, project_id: ${project_id}, title: ${title}, title type: ${typeof title}, sharedUID: ${sharedUID}`)
         let result = await knex.select('shared').from('characters').where({project_id: project_id, uid: uid})
         console.log(`shareCharacters running shared: ${JSON.stringify(result)}`)
         let prevSharedUID = result[0].shared[0]
-        if(prevSharedUID !== sharedUID) {
+        console.log(`preveSharedUID: ${prevSharedUID}, sharedUID: ${sharedUID}`)
+        if(prevSharedUID !== sharedUID && title !== 'null' ) {
+            console.log(`prevShared !== sharedUID first condition title: ${title} type: ${typeof title}`)
+            
             return knex.raw(`UPDATE characters 
                         SET shared = shared || '{${sharedUID}}' 
                         where project_id = '${project_id}' 
@@ -40,15 +43,30 @@ const CharactersService = {
                         project_name = '${title}'
                         AND
                         uid = '${uid}'`)
+        } else {
+            return knex.raw(`UPDATE characters 
+                        SET shared = shared || '{${sharedUID}}' 
+                        where project_id = '${project_id}' 
+                        AND
+                        uid = '${uid}'`)
         }
         
     },
 
-    getAllShared(knex, project_id) {
-        return knex.raw(`with arrays as (
+    getAllShared(knex, project_id, episode_id) {
+        console.log(`characters getAllShared projectID: ${project_id} episode_id: ${episode_id} typeof episode_id: ${typeof episode_id}`)
+        if(episode_id !== null) {
+            return knex.raw(`with arrays as (
+                         select shared, array_length(shared, 1) from characters where episode_id = '${episode_id}'
+            )
+            select shared from arrays order by array_length desc limit 1`)
+        } else {
+            return knex.raw(`with arrays as (
                          select shared, array_length(shared, 1) from characters where project_id = '${project_id}'
-        )
-        select shared from arrays order by array_length desc limit 1`)
+            )
+            select shared from arrays order by array_length desc limit 1`)
+        }
+        
     }
 
   
