@@ -3,6 +3,8 @@ const xss = require('xss')
 const bodyParser = express.json();
 const errorRouter = express.Router();
 const nodemailer = require('nodemailer')
+const { AWS_PASS, AWS_USER } = require('./config')
+
 
 const serializeError = error => ({
   name: xss(error.name),
@@ -31,8 +33,8 @@ errorRouter
           port: 587,
           secure: false,   //upgrade later with STARTTLS
           auth: {
-            user: "AKIASMVSHIUPXED27Y7D",
-            pass: "BG4YsM50oV0hyzMl3Wyh1R54JUGxggsbphtJHCEIXqOf"
+            user: AWS_USER,
+            pass: AWS_PASS
           }
         });
 

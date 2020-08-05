@@ -1,8 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const xss = require('xss')
 const logger = require('./logger')
 const nodemailer = require('nodemailer')
-
 const UserService = require('./user-service');
 const ProjectsService = require('./projects-service');
 const SharedProjectsService = require('./shared-projects-service');
@@ -12,6 +12,7 @@ const ScenesService = require('./scenes-service');
 const CharactersService = require('./characters-service');
 const usersRouter = express.Router();
 const bodyParser = express.json();
+const { AWS_PASS, AWS_USER } = require('./config')
 
 
 const serializeuser = user => ({
@@ -250,8 +251,8 @@ usersRouter
           port: 587,
           secure: false,   //upgrade later with STARTTLS
           auth: {
-            user: "AKIASMVSHIUPXED27Y7D",
-            pass: "BG4YsM50oV0hyzMl3Wyh1R54JUGxggsbphtJHCEIXqOf"
+            user: AWS_USER,
+            pass: AWS_PASS
           }
         });
 
