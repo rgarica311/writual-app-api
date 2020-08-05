@@ -1,18 +1,22 @@
 const CharactersService = {
 
-    getProjectCharacters(knex, project_id, uid) {
+    getProjectCharacters(knex, project_id, uid, episode_id) {
         console.log('get proj Characters running')
         console.log(`user_id in getProjectCharacters ${uid}`)
+        
         return knex.select('id', 'project_name', 'project_id', 'name', 'age', 'gender', 'details').from('characters').where({project_id: project_id, uid: uid})
+        
     },
 
-    getSharedCharacters(knex, uid, project_id) {    
+    getSharedCharacters(knex, uid, project_id, episode_id) {    
         console.log('shared characters service running uid:', uid)
-
+        
         return knex.raw(`select id, name, age, gender, details from characters where project_id = '${project_id}' and '${uid}' = any (shared)`)
             .then(obj => {
                 return obj.rows
             })
+        
+        
     },
 
     addCharacter(knex, newChar) {

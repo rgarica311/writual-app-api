@@ -1,9 +1,5 @@
 require('dotenv').config()
 const express = require('express');
-const session = require('express-session');
-const redis = require('redis');
-const redisStore = require('connect-redis')(session);
-const client  = redis.createClient();
 const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -22,6 +18,7 @@ const sharedEpisodesRouter = require('./shared-episodes-router')
 const messagesRouter = require('./messages-router')
 const detailsRouter = require('./details-router')
 const treatmentsRouter = require('./treatment-router')
+const errorRouter = require('./error-router')
 const app = express()
 const admin = require('./firebaseAdmin');
 const bodyParser = express.json();
@@ -32,10 +29,10 @@ const xss = require('xss')
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const knex = require('knex')
-const { PORT, DATABASE_URL } = require('./config')
+const { DATABASE_URL, PORT } = require('./config')
 
-http.listen(8000, () => {
-  console.log('socket io listening on port 8000')
+http.listen(PORT, () => {
+  console.log(`server listening on port: ${PORT}`)
 })
 
 const users = []
@@ -85,9 +82,9 @@ io.on('connect', (client) => {
     client.broadcast.emit('new-scene-added',  project_id, isEpisode)
   })
 
-  client.on('new-character-added', project_id => {
+  client.on('new-character-added', (project_id, isEpisode) => {
     console.log('new char added projectid: ', project_id)
-    client.broadcast.emit('new-character-added', project_id)
+    client.broadcast.emit('new-character-added', project_id, isEpisode)
   })
 
   client.on('update-detail', project_id => {
@@ -250,28 +247,20 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
   skip: () => NODE_ENV === 'test'
 }))
 
-app.use(session({
-  secret: 'ssshhhhh', 
-  store: new redisStore({ host: '192.168.0.13', port: 6379, client: client,ttl : 260}),
-  resave: false, 
-  saveUninitialized: false
-  })
-);
-
 async function verifyId(req, res, next) {
-  //console.log('verify id running')
- 
+  console.log('verify id running')
+   //console.log(`req._parsedOriginalUrl ${req._parsedOriginalUrl} req._parsedOriginalUrl.pathname ${req._parsedOriginalUrl.pathname} `)
   if(req._parsedOriginalUrl !== undefined && req._parsedOriginalUrl.pathname !== '/socket.io/'){
     const idToken = req.headers.authorization
-    //console.log('verify id idToken', idToken)
+    console.log('verify id idToken', idToken)
     try {
       const decodedToken = await admin.auth().verifyIdToken(idToken)
       if(decodedToken){
-        //console.log(`Decoded Token Success`)
-        //console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
+        console.log(`Decoded Token Success`)
+        console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
         req.uid = decodedToken.user_id
       } else {
-        //console.log('Token Not Decoded')
+        console.log('Token Not Decoded')
       }
       return next()
     } catch(e) {
@@ -279,15 +268,18 @@ async function verifyId(req, res, next) {
         return res.status(401).send('You are not authorized')
     }
   } else {
-      const idToken = arguments[0]
+      console.log(`rea.headers.auth ${req.headers.authorization}`)
+      const idToken = req.headers.authorization
+      console.log(`idToken in veryify ${idToken}`)
       try {
       const decodedToken = await admin.auth().verifyIdToken(idToken)
       if(decodedToken){
-        //console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
-        return decodedToken.user_id
+        console.log('verify id if decodedToken.user_id:', decodedToken.user_id)
+       req.uid = decodedToken.user_id
       }
+      return next()
     } catch(e) {
-        //console.log('e', e)
+        console.log('e', e)
         return res.status(401).send('You are not authorized')
     }
       //console.log(`debug private message: verifyId arguments ${JSON.stringify(arguments[0])} `)
@@ -311,6 +303,7 @@ app.use(scenesRouter);
 app.use(userRouter);
 app.use(detailsRouter);
 app.use(treatmentsRouter);
+app.use(errorRouter);
 
 
 app.use((error, req, res, next) => {

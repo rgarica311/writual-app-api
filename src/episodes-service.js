@@ -11,7 +11,7 @@ const EpisodesService = {
 
     deleteEpisode(knex, id) {
         console.log('episodes service runnig: ')
-        return knex('episodes').where({id}).delete()
+        return knex('episodes').where({uni_id: id}).delete()
     },
 
     getEpisodeToShare(knex, uid, episodeTitle) {

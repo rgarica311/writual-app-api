@@ -56,11 +56,11 @@ charactersRouter
   })
 
   charactersRouter
-    .route('/characters/:project_id')
+    .route('/characters/:project_id/:episode_id')
     .get((req, res, next) => {
       try {
-        const { project_id } = req.params
-        CharactersService.getProjectCharacters(req.app.get('db'), project_id, req.uid)
+        const { project_id, episode_id } = req.params
+        CharactersService.getProjectCharacters(req.app.get('db'), project_id, req.uid, episode_id)
           .then(characters => {
             if(!characters) {
               console.log(`Character for project ${project_id} not found`)
@@ -78,12 +78,12 @@ charactersRouter
     })
 
   charactersRouter
-    .route('/shared/characters/:project_id')
+    .route('/shared/characters/:project_id/:episode_id')
     .get((req, res, next) => {
       const { uid } = req
-      const { project_id } = req.params
+      const { project_id, episode_id } = req.params
       console.log('shared characters router accessed project_id', project_id)
-      CharactersService.getSharedCharacters(req.app.get('db'), uid, project_id)
+      CharactersService.getSharedCharacters(req.app.get('db'), uid, project_id, episode_id)
         .then(sharedCharacters => {
           console.log('sharedCharacters', JSON.stringify(sharedCharacters))
           res.json(sharedCharacters)

@@ -6,15 +6,22 @@ const EpisodesService = require('./episodes-service');
 const episodesRouter = express.Router();
 
 const serializeEpisode = episode => ({
-  id: episode.id,
-  title: xss(episode.title),
+  uid: episode.uid,
+  show_title: xss(episode.show_title),
+  project_id: episode.project_id,
+  episode_title: xss(episode.episode_title),
   author: xss(episode.author),
   logline: xss(episode.logline),
   genre: episode.genre,
   projformat: episode.projformat,
   budget: xss(episode.budget),
   timeperiod: xss(episode.timeperiod),
-  similarepisodes: xss(episode.similarepisodes)
+  similarepisodes: xss(episode.similarepisodes),
+  framework: episode.framework,
+  bottle_episode: episode.bottle_episode,
+  shared: episode.shared,
+  visible: episode.visible,
+  show_hidden: episode.show_hidden
 })
 
 episodesRouter 
@@ -41,14 +48,13 @@ episodesRouter
               return res.status(400).send(`${field} is required`)
           } 
         }
-        const { show_title, project_id, episode_title, author, logline, genre, projformat, budget, timeperiod, similarepisodes, framework, bottle_episode, shared } = req.body
+        const { show_title, project_id, episode_title, author, logline, genre, projformat, budget, timeperiod, similarepisodes, framework, bottle_episode, shared, visible, show_hidden } = req.body
         const uid = req.uid
         console.log('req.uid', req.uid)
-        const visible = true
-        const show_hidden = false
+       
         const newEpisode = { uid, show_title, project_id, episode_title, author, logline, genre, projformat, budget, timeperiod, similarepisodes, framework, bottle_episode, shared, visible, show_hidden }
         console.log('newEpisode in router', newEpisode)
-        EpisodesService.addEpisode(req.app.get('db'), newEpisode)
+        EpisodesService.addEpisode(req.app.get('db'), serializeEpisode(newEpisode))
         .then(episode => {
             console.log(`Episode created with id ${episode.id}`)
             res.status(201)

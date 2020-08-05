@@ -1,20 +1,22 @@
 const ScenesService = {
-    
-    getProjectScenes(knex, project_id, uid, isEpisode){
-         console.log(`scenes service params proj:${project_id} uid:${uid} isEpisode: ${isEpisode} typeof isEpisode: ${typeof isEpisode}`)
-        if(isEpisode){
-            return knex.select('id', 'uid', 'project_name', 'project_id', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({episode_id: project_id, uid: uid}).orderBy('date_created', 'dsc')
+
+    getProjectScenes(knex, project_id, uid, episode_id){
+        console.log(`scenes service params proj:${project_id} uid:${uid} episode_id: ${episode_id} typeof episode_id: ${typeof episode_id}`)
+        if(episode_id !== 'undefined' && episode_id !== 'true' && episode_id !== 'null'){
+            return knex.select('id', 'uid', 'project_name', 'project_id', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({episode_id: episode_id, uid: uid}).orderBy('date_created', 'dsc')
         } else {
             return knex.select('id', 'uid', 'project_name', 'project_id', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({project_id: project_id, uid: uid}).orderBy('date_created', 'dsc')
         }
     },
 
-    getSharedScenes(knex, uid, project_id, isEpisode) {
+    getSharedScenes(knex, uid, project_id, episode_id) {
         console.log('shared scenes service running uid:', uid)
         console.log(`shared scenes service running project_id: ${project_id}`)
-        if(isEpisode) {
+        console.log(`shared scenes service running episode_id: ${episode_id} type ${typeof episode_id}`)
+        if(episode_id !== 'undefined' && episode_id !== 'null') {
+            console.log('shared scenes get scenes for shared episode')
             return knex.raw(`select id, uid, project_name, project_id, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes 
-                        where episode_id = '${project_id}' 
+                        where episode_id = '${episode_id}' 
                         and '${uid}' = any (shared) 
                         order by 
                         date_created asc`)
@@ -22,6 +24,7 @@ const ScenesService = {
                                 return obj.rows
                             })
         } else {
+            console.log(`shared scenes get scenes for projects`)
             return knex.raw(`select id, uid, project_name, project_id, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes 
                         where project_id = '${project_id}' 
                         and '${uid}' = any (shared) 
@@ -48,7 +51,7 @@ const ScenesService = {
     },
 
     async shareScenes(knex, uid, project_id, sharedUID, projFormat, title) {
-        let result = await knex.select('shared').from('characters').where({project_id: project_id, uid: uid})
+        let result = await knex.select('shared').from('scenes').where({project_id: project_id, uid: uid})
         console.log(`debug share project shareScenes service running: result ${JSON.stringify(result)}`)
         let prevSharedUID = result[0].shared[0]
         console.log(`debug share project shareScenes service running: prevSharedUID ${prevSharedUID}`)

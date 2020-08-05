@@ -21,20 +21,13 @@ const serializeScene = scene => ({
 })
 
 scenesRouter
-  .route('/scenes/:project_id/:is_episode')
+  .route('/scenes/:project_id/:episode_id')
   .get((req, res, next) => {
     try {
-      const { project_id, is_episode } = req.params
-      let isEpisode
-      console.log(`type of isEpisode: ${typeof is_episode} isEpisode: ${is_episode}`)
-      if(is_episode === 'undefined'){
-        isEpisode = false
-      } else if (is_episode === 'true') {
-        isEpisode = true
-      } else if (is_episode === 'false') {
-        isEpisode = false
-      }
-      ScenesService.getProjectScenes(req.app.get('db'), project_id, req.uid, isEpisode)
+      const { project_id, episode_id } = req.params
+      console.log(`type of episode_id: ${typeof episode_id} episode_id: ${episode_id}`)
+      
+      ScenesService.getProjectScenes(req.app.get('db'), project_id, req.uid, episode_id,)
         .then(scene => {
           if(!scene) {
             console.log(`Scene for project ${scene} not found`)
@@ -96,16 +89,13 @@ scenesRouter
   })
 
   scenesRouter
-  .route('/shared/scenes/:project_id/:is_episode')
+  .route('/shared/scenes/:project_id/:episode_id')
   .get((req, res, next) => {
     const { uid } = req
-    const { project_id, is_episode } = req.params
-    let isEpisode
-    if(is_episode === 'true') {
-      isEpisode = true
-    } else { isEpisode = false }
+    const { project_id, episode_id } = req.params
+    
     console.log(`project_id in router ${project_id}`)
-    ScenesService.getSharedScenes(req.app.get('db'), uid, project_id, isEpisode)
+    ScenesService.getSharedScenes(req.app.get('db'), uid, project_id, episode_id)
       .then(sharedProjects => {
         console.log('sharedProjects', JSON.stringify(sharedProjects))
         res.json(sharedProjects)

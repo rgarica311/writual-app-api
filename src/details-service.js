@@ -3,7 +3,7 @@ const DetailsService = {
     getDetail(knex, detail, character, project_id){
         //console.log(`details getDetail service running: detail: ${detail.toLowerCase()} character: ${character} proj: ${proj}`)
         //console.log(`details get: ${knex.select(detail.toLowerCase()).from('details').where({character_name: character, proj_name: proj}).orderBy('date_created', 'desc').limit(1).returning('*')}`)
-        return knex.select(detail.toLowerCase()).from('details').where({character_name: character, project_id: project_id}).orderBy('date_created', 'desc').limit(1).returning('*').then(rows => {
+        return knex.select(detail.toLowerCase()).from('details').where({character_name: character, project_id: project_id}).orderBy('date_updated', 'desc').limit(1).returning('*').then(rows => {
             return rows[0]
         })
     },

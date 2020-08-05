@@ -6,10 +6,11 @@ const DetailsService = require('./details-service')
 detailsRouter
     .route('/details/:detail/:character/:project_id')
     .get((req, res, next) => {
-        console.log(`details details router accessed params: ${req.params}`)
+        console.log(`details details router accessed params: ${JSON.stringify(req.params)}`)
         const {detail, character, project_id} = req.params
         DetailsService.getDetail(req.app.get('db'), detail, character, project_id)
             .then(detail => {
+                console.log(`detail: ${JSON.stringify(detail)}`)
                 res.json(detail)
             })
             .catch(next)
