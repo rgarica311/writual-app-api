@@ -35,6 +35,9 @@ http.listen(PORT, () => {
   console.log(`server listening on port: ${PORT}`)
 })
 
+app.use(cors())
+app.options('*', cors())
+
 const users = []
 const sockets = []
 const titles = []
@@ -293,9 +296,7 @@ customCors = (req, res, next) => {
   next();
 }
 
-app.use(cors())
-app.options('*', customCors)
-app.use(customCors) 
+
 app.use(helmet())
 app.use(verifyId);
 app.use(anatomyRouter);
