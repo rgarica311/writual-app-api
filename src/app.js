@@ -287,13 +287,15 @@ async function verifyId(req, res, next) {
   }
 }
 
-app.use(cors())
-app.options('*', cors())
-app.use(function(req, res, next) {
+customCors = (req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://writualapp.com"); // update to match the domain you will make the request from
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
-});
+}
+
+app.use(cors())
+app.options('*', customCors)
+app.use(customCors) 
 app.use(helmet())
 app.use(verifyId);
 app.use(anatomyRouter);
