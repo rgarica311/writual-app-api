@@ -35,8 +35,7 @@ http.listen(PORT, () => {
   console.log(`server listening on port: ${PORT}`)
 })
 
-app.use(cors())
-app.options('*', cors())
+
 
 const users = []
 const sockets = []
@@ -290,13 +289,10 @@ async function verifyId(req, res, next) {
   }
 }
 
-customCors = (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://writualapp.com"); // update to match the domain you will make the request from
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-}
-
-
+app.use(cors({
+    origin: ['https://writualapp.com'],
+    credentials: true}))
+app.options('*', cors())
 app.use(helmet())
 app.use(verifyId);
 app.use(anatomyRouter);
