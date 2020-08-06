@@ -59,9 +59,7 @@ projectsRouter
 projectsRouter
   .route('/projects')
   .get((req, res, next) => {
-    //console.log('req.uid in router:', req.uid)
-    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+ 
     let sess = req.session
     const { uid } = req
     //console.log('uid in projects router get', uid)
