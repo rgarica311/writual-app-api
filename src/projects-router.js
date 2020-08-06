@@ -27,17 +27,17 @@ const serializeProject = project => ({
 projectsRouter
   .route('/projects')
   .post(bodyParser, (req, res, next) => {
-    console.log('projects post router: req.body', req.body)
-    console.log('projects post router: uid', req.uid)
+    //console.log('projects post router: req.body', req.body)
+    //console.log('projects post router: uid', req.uid)
     for(const field of ['title', 'author', 'logline', 'genre', 'projformat', 'budget', 'timeperiod', 'similarprojects', 'framework']) {
       if(!req.body[field]) {
-        console.log(`${field} is required`)
+        //console.log(`${field} is required`)
         return res.status(400).send(`${field} is required`)
       } 
     }
     const { title, author, logline, genre, projformat, budget, timeperiod, similarprojects, framework } = req.body
     const uid = req.uid
-    console.log('req.uid', req.uid)
+    //console.log('req.uid', req.uid)
     const visible = true
     const show_hidden = false
     const newProj = { uid, title, author, logline, genre, projformat, budget, timeperiod, similarprojects, framework, visible, show_hidden }
@@ -46,7 +46,7 @@ projectsRouter
     
     ProjectsService.addProject(req.app.get('db'), serializeProject(newProj))
       .then(project => {
-        console.log(`Project created with id ${project.id}`)
+        //console.log(`Project created with id ${project.id}`)
         res.status(201)
         .json(project)
       })
@@ -59,13 +59,13 @@ projectsRouter
 projectsRouter
   .route('/projects')
   .get((req, res, next) => {
-    console.log('req.uid in router:', req.uid)
+    //console.log('req.uid in router:', req.uid)
     let sess = req.session
     const { uid } = req
-    console.log('uid in projects router get', uid)
+    //console.log('uid in projects router get', uid)
     ProjectsService.getUserProjects(req.app.get('db'), uid)
       .then(projects => {
-        console.log(`getUserProjects ran project ${JSON.stringify(projects)}`)
+        //console.log(`getUserProjects ran project ${JSON.stringify(projects)}`)
 
         res.json(projects)
       })
@@ -129,7 +129,7 @@ projectsRouter
         const { projectid } = req.params
         ProjectsService.deleteProject(req.app.get('db'), projectid)
           .then(numRowsAffected => {
-            console.log(`Project with id ${projectid} delted`)
+            //console.log(`Project with id ${projectid} delted`)
             res.status(204).send()
           })
           .catch(next)
@@ -163,12 +163,12 @@ projectsRouter
     .put((req, res, next) => {
       const { proj } = req.params
       const { uid } = req
-      console.log(`debug hide/show: proj: ${proj}, uid: ${uid}`)
+      //console.log(`debug hide/show: proj: ${proj}, uid: ${uid}`)
       ProjectsService.unHideProject(req.app.get('db'), proj, uid)
         .then(numRowsAffected => {
           ProjectsService.getHiddenProjects(req.app.get('db'), uid)
             .then(projects => {
-              console.log(`projects.length in getHidden for unhide: ${projects.length}`)
+              //console.log(`projects.length in getHidden for unhide: ${projects.length}`)
               if(projects.length < 1){
                 ProjectsService.showHiddenProjects(req.app.get('db'), uid, false)
                   .then(numRowsAffected => {

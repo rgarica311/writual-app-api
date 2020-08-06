@@ -10,7 +10,7 @@ const DetailsService = {
 
 
     postDetail(knex, newDetail){
-        console.log('details postDetail service running: newDetail', JSON.stringify(newDetail))
+        //console.log('details postDetail service running: newDetail', JSON.stringify(newDetail))
         return knex.insert(newDetail).into('details').returning('*')
             .then(rows => {
             return rows[0]
@@ -18,7 +18,7 @@ const DetailsService = {
     },
 
     updateDetail(knex, detail, character, project_id, raw){
-        console.log(`details updateDetail service running typeof rawEditorData: ${typeof raw}`)
+        //console.log(`details updateDetail service running typeof rawEditorData: ${typeof raw}`)
         return knex.raw(`update details
                          set ${detail} = '${JSON.stringify(raw)}'
                          where

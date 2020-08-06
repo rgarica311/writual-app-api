@@ -28,7 +28,7 @@ const serializeuser = user => ({
 usersRouter
   .route('/users')
   .post(bodyParser, (req, res, next) => {
-     console.log('req.body', req.body)
+     //console.log('req.body', req.body)
     for(const field of ['user_name', 'email', 'photo_url']) {
 
       if(!req.body[field]) {
@@ -40,19 +40,19 @@ usersRouter
     const { user_name, email, photo_url } = req.body
     const uid = req.uid
     const loggedInUser = { uid, user_name, email, photo_url }
-     console.log('loggedInUser in users route', loggedInUser)
+     //console.log('loggedInUser in users route', loggedInUser)
     try {
       UserService.getUsers(req.app.get('db'))
         .then(users => {
-           console.log(`users in get users then: ${JSON.stringify(users)}`)
+           //console.log(`users in get users then: ${JSON.stringify(users)}`)
           if(users.some(user => user.uid === loggedInUser.uid) === true){
-             console.log('same user')
+             //console.log('same user')
           } else {
-             console.log('new user')
+             //console.log('new user')
             UserService.addUser(req.app.get('db'), loggedInUser)
               .then(user => {
-                 console.log('user', user)
-                 console.log(`user created with id ${user.id}`)
+                 //console.log('user', user)
+                 //console.log(`user created with id ${user.id}`)
                 res.status(201)
                 .json(serializeuser(user))
                 })
@@ -62,7 +62,7 @@ usersRouter
         .catch(next)
 
     } catch(e){
-       console.log('error getting users', e)
+       //console.log('error getting users', e)
     }
     
   })
@@ -73,13 +73,36 @@ usersRouter
        req.connection.setTimeout( 20000 )
       const { email, project_id, projformat, message, permission } = req.params
       const { titles } = req.query
-      console.log(`debug share project STEP 1: user router accessed titles: ${titles} typeof: ${typeof titles}`)
+      //console.log(`debug share project STEP 1: user router accessed titles: ${titles} typeof: ${typeof titles}`)
       
       const uid  = req.uid
       
-      console.log(`email in users router ${email}, project_id ${project_id}`)
+      //console.log(`email in users router ${email}, project_id ${project_id}`)
       let user
-      if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com' || email === 'sashatomlinson16@gmail.com') {
+
+      const approvedEmails: [
+              "rory.garcia1@gmail.com",
+              "rory@skylineandmanor.com",
+              "rory@rorydane.com",
+              "austin.adams04@gmail.com",
+              "marcuscharlesmusic@gmail.com",
+              "margeauxdupuy@gmail.com",
+              "sdawkins2292@gmail.com",
+              "johnnyattero@gmail.com",
+              "kevincobarrubia@gmail.com",
+              "nt.schrader@gmail.com",
+              "nick@skylineandmanor.com",
+              "mox@skylineandmanor.com",
+              "j.michael.holder@gmail.com",
+              "ncastronuova@gmail.com",
+              "erickd7@gmail.com",
+              "ditomontiel@gmail.com",
+              "andrewsfray70@gmail.com",
+              "michael.cumberbatch@gmail.com", 
+              "erick@erickd.com",
+            ]
+      
+      if(approvedEmails.includes(email)) {
         try {
           res.locals.userExists = await UserService.verifyUserExists(req.app.get('db'), email)
         } catch(err) {
@@ -96,23 +119,23 @@ usersRouter
       }
     },
       async (req, res, next) => {
-        console.log(`sharing: res in next route ${JSON.stringify(res.locals)}` )
+        //console.log(`sharing: res in next route ${JSON.stringify(res.locals)}` )
         let user = res.locals.userExists
-        console.log(`user in midware ${JSON.stringify(user)}`)
+        //console.log(`user in midware ${JSON.stringify(user)}`)
         if(user[0].uid !== undefined && user[0].uid !== req.uid) {
           res.locals.sharedUID = user[0].uid 
           res.locals.projectToShare = await ProjectsService.getProjectToShare(req.app.get('db'), req.uid, req.params.project_id)
-          console.log(`debug share project getProjectToShare STEP 2: prjtoshare: ${JSON.stringify(res.locals.projectToShare)}`)
+          //console.log(`debug share project getProjectToShare STEP 2: prjtoshare: ${JSON.stringify(res.locals.projectToShare)}`)
           next()
         }
       },
       (req, res, next) => {
-        console.log(`third middleware locals prjtoshare ${JSON.stringify(res.locals.projectToShare)}`)
-        console.log(`third middleware locals shareduid ${JSON.stringify(res.locals.sharedUID)}`)
+        //console.log(`third middleware locals prjtoshare ${JSON.stringify(res.locals.projectToShare)}`)
+        //console.log(`third middleware locals shareduid ${JSON.stringify(res.locals.sharedUID)}`)
         
         ProjectsService.setShared(req.app.get('db'), req.uid, req.params.project_id)
           .then(response => {
-            console.log(`debug share project set shared STEP 3: res ${response}`)
+            //console.log(`debug share project set shared STEP 3: res ${response}`)
           })
         
         
@@ -120,7 +143,7 @@ usersRouter
       },
       async (req, res, next) => {
         let { projectToShare, sharedUID } = res.locals
-        console.log(`debug share project STEP 4: project to share: ${JSON.stringify(projectToShare)}`)
+        //console.log(`debug share project STEP 4: project to share: ${JSON.stringify(projectToShare)}`)
         if(projectToShare.length > 0) {
           projectToShare[0].visible = true
           projectToShare[0].shared_by_uid = req.uid
@@ -134,29 +157,29 @@ usersRouter
         
       },
       async (req, res, next) => {
-         console.log(`debug share project STEP 5: type of req.params.titles ${typeof req.query.titles} req.params.titles ${req.query.titles}`)
+         //console.log(`debug share project STEP 5: type of req.params.titles ${typeof req.query.titles} req.params.titles ${req.query.titles}`)
         
         res.locals.episodeTitles = req.query.titles
-         console.log('debug episode sharing: episodeTitles 1st:', JSON.stringify(res.locals.episodeTitles), JSON.stringify(res.locals.episodeTitles[0]))
+         //console.log('debug episode sharing: episodeTitles 1st:', JSON.stringify(res.locals.episodeTitles), JSON.stringify(res.locals.episodeTitles[0]))
 
         
-         console.log('debug episode sharing: res.locals.sharedProj', res.locals.sharedProj)
+         //console.log('debug episode sharing: res.locals.sharedProj', res.locals.sharedProj)
 
         if(res.locals.episodeTitles[0] !== 'null') {
-           console.log('debug episode sharing: episodeTitles:', JSON.stringify(res.locals.episodeTitles), JSON.stringify(res.locals.episodeTitles[0]))
+           //console.log('debug episode sharing: episodeTitles:', JSON.stringify(res.locals.episodeTitles), JSON.stringify(res.locals.episodeTitles[0]))
           if(res.locals.episodeTitles.length > 0) {
             res.locals.episodeTitles.map(ep => 
               EpisodesService.getEpisodeToShare(req.app.get('db'), req.uid, ep)
                 .then(async episodeToShare => {
-                   console.log(`debug share project STEP 6: episode to share then ${JSON.stringify(episodeToShare)}`)
+                   //console.log(`debug share project STEP 6: episode to share then ${JSON.stringify(episodeToShare)}`)
                   if(episodeToShare){
-                     console.log(`debug episode sharing: episode to share if ${JSON.stringify(episodeToShare)}`)
+                     //console.log(`debug episode sharing: episode to share if ${JSON.stringify(episodeToShare)}`)
                     
                     let project_id = episodeToShare[0].project_id
                     let result = await EpisodesService.getPermission(req.app.get('db'), project_id)
-                     console.log(`debug share project: result permission ${JSON.stringify(result)}`)
+                     //console.log(`debug share project: result permission ${JSON.stringify(result)}`)
                     let permission = result[0].permission
-                     console.log(`project permission: ${permission}`)
+                     //console.log(`project permission: ${permission}`)
                     /*episodeToShare[0].visible = true
                     episodeToShare[0].shared_by_uid = req.uid
                     episodeToShare[0].shared_with_uid = res.locals.sharedUID*/
@@ -173,20 +196,20 @@ usersRouter
                         clonedObj.shared_by_uid = req.uid
                         clonedObj.shared_with_uid = res.locals.sharedUID
                         clonedObj.permission = req.params.permission
-                         console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
+                         //console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
                         return clonedObj
                     }
                     let episode = renameKey(episodeToShare[0], 'uni_id', 'id')
-                     console.log(`debug set shared episode.id ${episode.id}`)
-                     console.log(`debug share project: shared episode ${JSON.stringify(episode)}`)
+                     //console.log(`debug set shared episode.id ${episode.id}`)
+                     //console.log(`debug share project: shared episode ${JSON.stringify(episode)}`)
                     EpisodesService.shareEpisode(req.app.get('db'), episode)
                       .then(ep => {
-                         console.log('shared ep', ep)
+                         //console.log('shared ep', ep)
                       })
                     
                     EpisodesService.setShared(req.app.get('db'), req.uid, episode.id)
                       .then(ep => {
-                         console.log(`set shared on episdeos`, ep)
+                         //console.log(`set shared on episdeos`, ep)
                       })
                   }
                 })
@@ -195,7 +218,7 @@ usersRouter
           }
           
         } else if(req.params.projformat === 'Television') {
-            console.log('debug episode sharing: episode titles length:', res.locals.episodeTitles)
+            //console.log('debug episode sharing: episode titles length:', res.locals.episodeTitles)
             clone = (obj) => Object.assign({}, obj);
 
             renameKey = (object, key, newKey) => {
@@ -207,15 +230,15 @@ usersRouter
                 clonedObj.show_hidden = false
                 clonedObj.shared_by_uid = req.uid
                 clonedObj.shared_with_uid = res.locals.sharedUID
-                 console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
+                 //console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
                 return clonedObj
             }
 
             let allEpisodes = await EpisodesService.getAllEpisodes(req.app.get('db'), req.uid, req.params.project_id)
-            console.log(`debug episode sharing: allEpisodes: ${JSON.stringify(allEpisodes)}`)
+            //console.log(`debug episode sharing: allEpisodes: ${JSON.stringify(allEpisodes)}`)
             counter = 0
             allEpisodes.map( async episode => {
-              console.log(`individual episode: ${JSON.stringify(episode)}`)
+              //console.log(`individual episode: ${JSON.stringify(episode)}`)
               
               res.locals.shared = false
               let project_id = episode.project_id
@@ -223,9 +246,9 @@ usersRouter
               let permission
               try {
                 result = await EpisodesService.getPermission(req.app.get('db'), project_id)
-                console.log(`project result all episodes: ${JSON.stringify(result)}`)
+                //console.log(`project result all episodes: ${JSON.stringify(result)}`)
                 permission = result[0].permission
-                 console.log(`all episodes project permission: ${permission}`)
+                 //console.log(`all episodes project permission: ${permission}`)
               } catch (err) {
                  console.error(`error getting permissions: ${err}`)
               }
@@ -234,9 +257,9 @@ usersRouter
               episode.permission = req.params.permission
               delete episode.shared
               EpisodesService.shareEpisode(req.app.get('db'), renameKey(episode, 'uid', 'shared_by_uid'), counter++)
-               console.log(`debug set shared allEpisodes episode.id ${episode.id} req.uid ${req.uid}`)
+               //console.log(`debug set shared allEpisodes episode.id ${episode.id} req.uid ${req.uid}`)
               EpisodesService.setShared(req.app.get('db'), req.uid, episode.id)
-                      .then(ep => {console.log(`set shared on episdeos`, ep)})
+                      .then(ep => {//console.log(`set shared on episdeos`, ep)})
             }) 
 
             
@@ -257,11 +280,11 @@ usersRouter
         });
 
         transporter.verify(function(error, success) {
-           console.log('transporter verify running')
+           //console.log('transporter verify running')
           if (error) {
-             console.log(error);
+             //console.log(error);
           } else {
-             console.log("Server is ready to take our messages");
+             //console.log("Server is ready to take our messages");
           }
         });
 
@@ -273,7 +296,7 @@ usersRouter
           //html: "<b>Hello world?</b>"   //html body
         });
 
-         console.log("Message sent: %s", info.messageId);
+         //console.log("Message sent: %s", info.messageId);
         next()
       },
       (req, res, next) => {
@@ -282,7 +305,7 @@ usersRouter
             try {
               ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
                 .then(rows => {
-                   console.log(`rows updated: ${rows}`)
+                   //console.log(`rows updated: ${rows}`)
                 })
               
             } catch (err) {
@@ -292,7 +315,7 @@ usersRouter
             try {
               CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, title)
                 .then(rows => {
-                   console.log(`rows updated: ${rows}`)
+                   //console.log(`rows updated: ${rows}`)
                 })
               res.status(200).send()
             } catch (err) {
@@ -311,7 +334,7 @@ usersRouter
         try {
           ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
             .then(rows => {
-               console.log(`rows updated: ${rows}`)
+               //console.log(`rows updated: ${rows}`)
             })
           
         } catch (err) {
@@ -320,7 +343,7 @@ usersRouter
         try {
           CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID)
             .then(rows => {
-               console.log(`rows updated: ${rows}`)
+               //console.log(`rows updated: ${rows}`)
             })
           res.status(200).send()
         } catch (err) {
@@ -336,7 +359,7 @@ usersRouter
     .route('/users/user/:user')
     .get((req, res, next) => {
       const { user } = req.params
-       console.log(`user in users router ${user}`)
+       //console.log(`user in users router ${user}`)
       UserService.getUsers(req.app.get('db'), user)
         .then(users => {
           res.json(users)
@@ -350,7 +373,7 @@ usersRouter
         const { userid } = req.params
         UserService.deleteuser(req.app.get('db'), userid)
           .then(numRowsAffected => {
-            console.log(`user with id ${userid} delted`)
+            //console.log(`user with id ${userid} delted`)
             res.status(204).send()
           })
           .catch(next)
@@ -359,11 +382,11 @@ usersRouter
   usersRouter
     .route('/message/iconurl/:sender_uid')
     .get((req, res, next) => {
-         console.log(`message icon_url route accessed`)
+         //console.log(`message icon_url route accessed`)
         const { sender_uid } = req.params
         UserService.getMessageIconUrl(req.app.get('db'), sender_uid)
             .then(url => {
-               console.log(`getMessageIcon response url: ${JSON.stringify(url)}`)
+               //console.log(`getMessageIcon response url: ${JSON.stringify(url)}`)
               res.json(url)
             })
             .catch(next)

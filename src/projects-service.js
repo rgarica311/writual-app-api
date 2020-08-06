@@ -7,7 +7,7 @@ const  ProjectsService = {
   },
 
   getSharedWithUids(knex, uid, project_id, shared, isEpisode) {
-    console.log(`getSharedWithUids service running uid: ${uid} project_id: ${project_id} isEpisode: ${isEpisode} type of isEpisode: ${typeof isEpisode}`)
+    //console.log(`getSharedWithUids service running uid: ${uid} project_id: ${project_id} isEpisode: ${isEpisode} type of isEpisode: ${typeof isEpisode}`)
     if(shared === 'false') {
       //console.log('gSWUids false')
       if(isEpisode === 'true') {
@@ -42,7 +42,7 @@ const  ProjectsService = {
   },
 
   /*getPhotoUrls(knex, id){
-    console.log('debug photourl: getPhotoUrls running id', id )
+    //console.log('debug photourl: getPhotoUrls running id', id )
     return knex('users').where({uid: id})
   },*/
 
@@ -81,12 +81,12 @@ const  ProjectsService = {
   },
 
   deleteProject(knex, id) {
-    console.log('projects service runnig: ')
+    //console.log('projects service runnig: ')
     return knex('projects').where({id}).delete()
   },
 
   hideProject(knex, proj, uid) {
-    console.log('projects service runnig:  hidProject running')
+    //console.log('projects service runnig:  hidProject running')
     return knex.raw(`UPDATE projects
                      SET visible = ${false}
                      where title = '${proj}'
@@ -95,7 +95,7 @@ const  ProjectsService = {
   },
 
   unHideProject(knex, proj, uid) {
-    console.log(`projects service runnig:  debug hide/show: unHideProject servivce running: proj: ${proj}, uid: ${uid}`)
+    //console.log(`projects service runnig:  debug hide/show: unHideProject servivce running: proj: ${proj}, uid: ${uid}`)
     return knex.raw(`UPDATE projects
                      SET visible = ${true}
                      where title = '${proj}'
@@ -104,19 +104,19 @@ const  ProjectsService = {
   },
 
   showHiddenProjects(knex, uid, showhiddenmode) {
-    console.log('projects service runnig: ')
+    //console.log('projects service runnig: ')
     return knex.raw(`update projects
                      set show_hidden = ${showhiddenmode}
                      where uid = '${uid}'`)
   },
 
   getHiddenProjects(knex, uid){
-    console.log('projects service runnig: ')
+    //console.log('projects service runnig: ')
     return knex('projects').where({uid: uid, visible: false})
   },
 
   showProject(knex, proj, uid) {
-    console.log('projects service runnig: ')
+    //console.log('projects service runnig: ')
     return knex.raw(`UPDATE projects
                      SET visible = ${true}
                      where title = '${proj}'

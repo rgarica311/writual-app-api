@@ -116,7 +116,7 @@ const  MessagesService = {
     },
 
     postMessage(knex, message) {
-        console.log(`post message: ${message}`)
+        //console.log(`post message: ${message}`)
         knex.insert(message).into('messages').returning('*')
             .then(rows => {
                 return rows[0]

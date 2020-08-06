@@ -18,7 +18,7 @@ errorRouter
 .post(bodyParser, async (req, res, next) => {
     for(const field of ['name', 'email', 'error']) {
         if(!req.body[field]) {
-            console.log(`${field} is required`)
+            //console.log(`${field} is required`)
             return res.status(400).send(`${field} is required`)
         } 
     }
@@ -27,7 +27,7 @@ errorRouter
     
     const errorReport = {name, email, error}
     const serializedErrRep = serializeError(errorReport)
-    console.log(`error report: ${JSON.stringify(serializedErrRep)}`)
+    //console.log(`error report: ${JSON.stringify(serializedErrRep)}`)
     let transporter = nodemailer.createTransport({
           host: "email-smtp.us-west-2.amazonaws.com",
           port: 587,
@@ -39,11 +39,11 @@ errorRouter
         });
 
         transporter.verify(function(error, success) {
-           console.log('transporter verify running')
+           //console.log('transporter verify running')
           if (error) {
-             console.log(error);
+             //console.log(error);
           } else {
-             console.log("Server is ready to take our messages");
+             //console.log("Server is ready to take our messages");
           }
         });
 
@@ -55,7 +55,7 @@ errorRouter
           //html: "<b>Hello world?</b>"   //html body
         });
 
-        console.log("Message sent: %s", info.messageId);
+        //console.log("Message sent: %s", info.messageId);
 })
 
 module.exports = errorRouter
