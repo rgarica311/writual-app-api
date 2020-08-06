@@ -288,6 +288,7 @@ async function verifyId(req, res, next) {
 }
 
 app.use(cors())
+app.options('*', cors())
 app.use(helmet())
 app.use(verifyId);
 app.use(anatomyRouter);
