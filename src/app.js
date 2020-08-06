@@ -292,7 +292,6 @@ async function verifyId(req, res, next) {
 app.use(cors({
     origin: ['https://writualapp.com'],
     credentials: true}))
-app.options('*', cors())
 app.use(helmet())
 app.use(verifyId);
 app.use(anatomyRouter);
