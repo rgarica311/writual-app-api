@@ -40,7 +40,7 @@ messagesRouter
 messagesRouter
     .route('/message/iconurl/:sender_uid')
     .get((req, res, next) => {
-        //console.log(`message icon_url route accessed`)
+        console.log(`message icon_url route accessed`)
 
         const sender_uid = req.params.sender_uid
         MessagesService.getMessageIconUrl(req.app.get('db'), sender_uid)

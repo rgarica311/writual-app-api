@@ -29,7 +29,7 @@ episodesRouter
     .get((req, res, next) => {
         const { uid } = req
         const { title } = req.params
-        //console.log('get episodes router runnin uid', uid)
+        console.log('get episodes router runnin uid', uid)
         EpisodesService.getEpisodes(req.app.get('db'), uid, title)
             .then(episodes => {
                 res.json(episodes)
@@ -40,23 +40,23 @@ episodesRouter
 episodesRouter
     .route('/episodes')
     .post(bodyParser, (req, res, next) => {
-        //console.log('episodes post router: req.body', req.body)
-        //console.log('episodes post router: uid', req.uid)
+        console.log('episodes post router: req.body', req.body)
+        console.log('episodes post router: uid', req.uid)
         for(const field of ['show_title', 'episode_title', 'author', 'logline', 'genre', 'projformat', 'budget', 'timeperiod', 'similarepisodes', 'framework', 'bottle_episode']) {
           if(!req.body[field]) {
-              //console.log(`${field} is required`)
+              console.log(`${field} is required`)
               return res.status(400).send(`${field} is required`)
           } 
         }
         const { show_title, project_id, episode_title, author, logline, genre, projformat, budget, timeperiod, similarepisodes, framework, bottle_episode, shared, visible, show_hidden } = req.body
         const uid = req.uid
-        //console.log('req.uid', req.uid)
+        console.log('req.uid', req.uid)
        
         const newEpisode = { uid, show_title, project_id, episode_title, author, logline, genre, projformat, budget, timeperiod, similarepisodes, framework, bottle_episode, shared, visible, show_hidden }
-        //console.log('newEpisode in router', newEpisode)
+        console.log('newEpisode in router', newEpisode)
         EpisodesService.addEpisode(req.app.get('db'), serializeEpisode(newEpisode))
         .then(episode => {
-            //console.log(`Episode created with id ${episode.id}`)
+            console.log(`Episode created with id ${episode.id}`)
             res.status(201)
             .json(episode)
         })
@@ -69,7 +69,7 @@ episodesRouter
         const { episodeid } = req.params
         EpisodesService.deleteEpisode(req.app.get('db'), episodeid)
           .then(numRowsAffected => {
-            //console.log(`Episode with id ${episodeid} delted`)
+            console.log(`Episode with id ${episodeid} delted`)
             res.status(204).send()
           })
           .catch(next)
@@ -104,12 +104,12 @@ episodesRouter
     .put((req, res, next) => {
       const { show, episode } = req.params
       const { uid } = req
-      //console.log(`debug hide/show episode: ${show}, uid: ${uid}`)
+      console.log(`debug hide/show episode: ${show}, uid: ${uid}`)
       EpisodesService.unHideEpisode(req.app.get('db'), show, episode, uid)
         .then(numRowsAffected => {
           EpisodesService.getHiddenEpisodes(req.app.get('db'), uid)
             .then(episodes => {
-              //console.log(`episodes.length in getHidden for unhide: ${episodes.length}`)
+              console.log(`episodes.length in getHidden for unhide: ${episodes.length}`)
               if(episodes.length < 1){
                 EpisodesService.showHiddenEpisodes(req.app.get('db'), uid, false)
                   .then(numRowsAffected => {
