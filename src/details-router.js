@@ -59,7 +59,11 @@ detailsRouter
         console.log(`details update route typeof raw: ${typeof raw}`)
         console.log(`details update route raw keys: ${Object.keys(raw)}`)
         console.log(`details update route json stringify raw: ${JSON.stringify(raw)}`)
+<<<<<<< HEAD
         //console.log(`details update route json parse raw: ${JSON.parse(raw)}`)
+=======
+        console.log(`details update route json parse raw: ${JSON.parse(raw)}`)
+>>>>>>> 5552560... turn logs back on temporarily
 
         DetailsService.updateDetail(req.app.get('db'), detail, character, proj_id, raw)
             .then(numRowsAffected => {

@@ -42,7 +42,7 @@ projectsRouter
     const show_hidden = false
     const newProj = { uid, title, author, logline, genre, projformat, budget, timeperiod, similarprojects, framework, visible, show_hidden }
     //const serialized = serializeProject(newProj)
-    //console.log('serialized newProj in router', serialized)
+    console.log('serialized newProj in router', serialized)
     
     ProjectsService.addProject(req.app.get('db'), serializeProject(newProj))
       .then(project => {
@@ -76,42 +76,42 @@ projectsRouter
   .route('/projects/iconurls/:project_id/:shared/:episode')
   .get((req, res, next) => {
     const { project_id, shared, episode } = req.params
-    //console.log(`getIconUrls router title ${title} shared: ${shared} type of shared: ${typeof shared}`)
+    console.log(`getIconUrls router title ${title} shared: ${shared} type of shared: ${typeof shared}`)
     const { uid } = req
     const photoUrls = []
     const sharedWith = []
     const sharedBy = []
     let ids
-    //console.log('debug photourl: uid in projects router get', uid)
-    //console.log('debug photourl: title in projects router get', title)
+    console.log('debug photourl: uid in projects router get', uid)
+    console.log('debug photourl: title in projects router get', title)
 
     ProjectsService.getSharedWithUids(req.app.get('db'), req.uid, project_id, shared, episode)
     .then(sharedWithUids => {
-      //console.log(`sharedWithUids: ${JSON.stringify(sharedWithUids)}`)
+      console.log(`sharedWithUids: ${JSON.stringify(sharedWithUids)}`)
       sharedWithUids.map(obj => {
-        //console.log(`sharedwithid id: ${JSON.stringify(obj)}, id.shared_with_uid: ${obj.shared_with_uid} `)
+        console.log(`sharedwithid id: ${JSON.stringify(obj)}, id.shared_with_uid: ${obj.shared_with_uid} `)
         if(obj.shared_with_uid !== undefined) {
-            //console.log(`getSharedWithUids obj.shared_with_uid: ${obj.shared_with_uid}`)
+            console.log(`getSharedWithUids obj.shared_with_uid: ${obj.shared_with_uid}`)
             sharedWith.push(obj.shared_with_uid)
         } else {
-            //console.log(`getSharedWithUids obj.shared_by_uid: ${obj.shared_by_uid}`)
+            console.log(`getSharedWithUids obj.shared_by_uid: ${obj.shared_by_uid}`)
             sharedBy.push(obj.shared_by_uid)
         }
-        //console.log(`sharedWith.length: ${sharedWith.length}`)
+        console.log(`sharedWith.length: ${sharedWith.length}`)
       })
-      //console.log(`sharedWith if: ${sharedWith}`)
+      console.log(`sharedWith if: ${sharedWith}`)
       
       if(sharedWith.length > 0) {
-        //console.log(`sharedWith ${sharedWith}`)
+        console.log(`sharedWith ${sharedWith}`)
         ids = sharedWith
       } else {
-          //console.log(`sharedBy ${sharedBy}`)
+          console.log(`sharedBy ${sharedBy}`)
           ids = sharedBy
       }
-      //console.log('getSharedWithUids ids:', ids)
+      console.log('getSharedWithUids ids:', ids)
       ProjectsService.test(req.app.get('db'), ids)
         .then(photoUrl => {
-          //console.log(`photoUrl: ${JSON.stringify(photoUrl)}`)
+          console.log(`photoUrl: ${JSON.stringify(photoUrl)}`)
           res.json(photoUrl)
         })
      

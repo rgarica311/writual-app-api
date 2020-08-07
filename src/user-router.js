@@ -44,6 +44,7 @@ usersRouter
     try {
       UserService.getUsers(req.app.get('db'))
         .then(users => {
+<<<<<<< HEAD
            console.log(`users in get users then: ${JSON.stringify(users)}`)
           if(users.some(user => user.uid === loggedInUser.uid) === true){
              console.log('same user')
@@ -53,6 +54,13 @@ usersRouter
               .then(user => {
                  console.log('user', user)
                  console.log(`user created with id ${user.id}`)
+=======
+          if(users.some(user => user.uid === loggedInUser.uid) === true){
+          } else {
+            UserService.addUser(req.app.get('db'), loggedInUser)
+              .then(user => {
+                 
+>>>>>>> 5552560... turn logs back on temporarily
                 res.status(201)
                 .json(serializeuser(user))
                 })
@@ -79,7 +87,34 @@ usersRouter
       
       console.log(`email in users router ${email}, project_id ${project_id}`)
       let user
+<<<<<<< HEAD
       if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com' || email === 'sashatomlinson16@gmail.com') {
+=======
+
+      const approvedEmails = [
+              "rory.garcia1@gmail.com",
+              "rory@skylineandmanor.com",
+              "rory@rorydane.com",
+              "austin.adams04@gmail.com",
+              "marcuscharlesmusic@gmail.com",
+              "margeauxdupuy@gmail.com",
+              "sdawkins2292@gmail.com",
+              "johnnyattero@gmail.com",
+              "kevincobarrubia@gmail.com",
+              "nt.schrader@gmail.com",
+              "nick@skylineandmanor.com",
+              "mox@skylineandmanor.com",
+              "j.michael.holder@gmail.com",
+              "ncastronuova@gmail.com",
+              "erickd7@gmail.com",
+              "ditomontiel@gmail.com",
+              "andrewsfray70@gmail.com",
+              "michael.cumberbatch@gmail.com", 
+              "erick@erickd.com",
+            ]
+      
+      if(approvedEmails.includes(email)) {
+>>>>>>> 5552560... turn logs back on temporarily
         try {
           res.locals.userExists = await UserService.verifyUserExists(req.app.get('db'), email)
         } catch(err) {
@@ -154,12 +189,17 @@ usersRouter
                     
                     let project_id = episodeToShare[0].project_id
                     let result = await EpisodesService.getPermission(req.app.get('db'), project_id)
+<<<<<<< HEAD
                      console.log(`debug share project: result permission ${JSON.stringify(result)}`)
                     let permission = result[0].permission
                      console.log(`project permission: ${permission}`)
                     /*episodeToShare[0].visible = true
                     episodeToShare[0].shared_by_uid = req.uid
                     episodeToShare[0].shared_with_uid = res.locals.sharedUID*/
+=======
+                    let permission = result[0].permission
+                    
+>>>>>>> 5552560... turn logs back on temporarily
 
                     clone = (obj) => Object.assign({}, obj);
 
@@ -173,12 +213,19 @@ usersRouter
                         clonedObj.shared_by_uid = req.uid
                         clonedObj.shared_with_uid = res.locals.sharedUID
                         clonedObj.permission = req.params.permission
+<<<<<<< HEAD
                          console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
                         return clonedObj
                     }
                     let episode = renameKey(episodeToShare[0], 'uni_id', 'id')
                      console.log(`debug set shared episode.id ${episode.id}`)
                      console.log(`debug share project: shared episode ${JSON.stringify(episode)}`)
+=======
+                        return clonedObj
+                    }
+                    let episode = renameKey(episodeToShare[0], 'uni_id', 'id')
+                     
+>>>>>>> 5552560... turn logs back on temporarily
                     EpisodesService.shareEpisode(req.app.get('db'), episode)
                       .then(ep => {
                          console.log('shared ep', ep)
@@ -195,7 +242,10 @@ usersRouter
           }
           
         } else if(req.params.projformat === 'Television') {
+<<<<<<< HEAD
             console.log('debug episode sharing: episode titles length:', res.locals.episodeTitles)
+=======
+>>>>>>> 5552560... turn logs back on temporarily
             clone = (obj) => Object.assign({}, obj);
 
             renameKey = (object, key, newKey) => {
@@ -212,10 +262,15 @@ usersRouter
             }
 
             let allEpisodes = await EpisodesService.getAllEpisodes(req.app.get('db'), req.uid, req.params.project_id)
+<<<<<<< HEAD
             console.log(`debug episode sharing: allEpisodes: ${JSON.stringify(allEpisodes)}`)
             counter = 0
             allEpisodes.map( async episode => {
               console.log(`individual episode: ${JSON.stringify(episode)}`)
+=======
+            counter = 0
+            allEpisodes.map( async episode => {
+>>>>>>> 5552560... turn logs back on temporarily
               
               res.locals.shared = false
               let project_id = episode.project_id
@@ -223,9 +278,13 @@ usersRouter
               let permission
               try {
                 result = await EpisodesService.getPermission(req.app.get('db'), project_id)
+<<<<<<< HEAD
                 console.log(`project result all episodes: ${JSON.stringify(result)}`)
                 permission = result[0].permission
                  console.log(`all episodes project permission: ${permission}`)
+=======
+                permission = result[0].permission
+>>>>>>> 5552560... turn logs back on temporarily
               } catch (err) {
                  console.error(`error getting permissions: ${err}`)
               }
@@ -234,7 +293,10 @@ usersRouter
               episode.permission = req.params.permission
               delete episode.shared
               EpisodesService.shareEpisode(req.app.get('db'), renameKey(episode, 'uid', 'shared_by_uid'), counter++)
+<<<<<<< HEAD
                console.log(`debug set shared allEpisodes episode.id ${episode.id} req.uid ${req.uid}`)
+=======
+>>>>>>> 5552560... turn logs back on temporarily
               EpisodesService.setShared(req.app.get('db'), req.uid, episode.id)
                       .then(ep => {console.log(`set shared on episdeos`, ep)})
             }) 

@@ -1,22 +1,22 @@
 const  ProjectsService = {
   
   getUserProjects(knex, uid) {
-	  //console.log('projects service runnig: get user projects running, uid', uid)
-    //console.log(`getUserProjects running knex: ${knex}`)
+	  console.log('projects service runnig: get user projects running, uid', uid)
+    console.log(`getUserProjects running knex: ${knex}`)
     return knex('projects').where({uid: uid}).orderBy('date_created', 'dsc')
   },
 
   getSharedWithUids(knex, uid, project_id, shared, isEpisode) {
     console.log(`getSharedWithUids service running uid: ${uid} project_id: ${project_id} isEpisode: ${isEpisode} type of isEpisode: ${typeof isEpisode}`)
     if(shared === 'false') {
-      //console.log('gSWUids false')
+      console.log('gSWUids false')
       if(isEpisode === 'true') {
         return knex.select('shared_with_uid').from('shared_episodes').where({shared_by_uid: uid,id: project_id})
       } else {
           return knex.select('shared_with_uid').from('sharedprojects').where({shared_by_uid: uid, id: project_id})
       }
     } else {
-      //console.log('gSWUids true')
+      console.log('gSWUids true')
       if(isEpisode === 'true') {
         return knex.select('shared_by_uid').from('shared_episodes').where({shared_with_uid: uid, id: project_id})
       } else {
@@ -27,17 +27,17 @@ const  ProjectsService = {
   },
 
   test(knex, ids){
-    //console.log(`test service running ids: ${ids}`)
+    console.log(`test service running ids: ${ids}`)
     let queryStr = knex('users').where({uid: ids[0]})
     if(ids.length > 0){
-      //console.log('ids', ids)
+      console.log('ids', ids)
       for(i=1; i<ids.length; i++){
-        //console.log('index', i)
+        console.log('index', i)
         queryStr.orWhere({uid: ids[i]})
-        //console.log(`queryStr ${queryStr}`)
+        console.log(`queryStr ${queryStr}`)
       }
     }
-    //console.log(`queryStr: ${queryStr}`)
+    console.log(`queryStr: ${queryStr}`)
     return queryStr
   },
 
@@ -47,24 +47,24 @@ const  ProjectsService = {
   },*/
 
   getSharedProjects(knex, uid) {
-    //console.log('projects service runnig: shared projects service running uid:', uid)
+    console.log('projects service runnig: shared projects service running uid:', uid)
     return knex('projects').whereRaw(`'${uid}' = any (shared)`)
   },
 
   setShared(knex, uid, project_id) {
-    //console.log(`set shared running uid ${uid} project_id ${project_id}`)
+    console.log(`set shared running uid ${uid} project_id ${project_id}`)
     return knex('projects').update({shared: true}).where({uid: uid, id: project_id})
   },
 
   getProjectToShare(knex, uid, project_id) {
-    //console.log('getProjectToShare runnig uid', uid)
+    console.log('getProjectToShare runnig uid', uid)
     //setShared(knex, uid, proj)
     return knex.select('id', 'title', 'author', 'logline', 'genre', 'projformat', 'has_episodes', 'budget', 'timeperiod', 'similarprojects', 'framework').from('projects').where({uid: uid, id: project_id})
   },
 
   
   shareProject(knex, uid, projectName, sharedUID) {
-    //console.log(`projects service runnig: shareProject running: uid: ${uid}, projectName: ${projectName}, sharedUID: ${sharedUID}`)
+    console.log(`projects service runnig: shareProject running: uid: ${uid}, projectName: ${projectName}, sharedUID: ${sharedUID}`)
     return knex.raw(`UPDATE projects 
                     SET shared = shared || '{${sharedUID}}' 
                     where title = '${projectName}' 
@@ -73,7 +73,7 @@ const  ProjectsService = {
   },
 
   addProject(knex, newProj) {
-    //console.log('projects service runnig: newProj in add project service', newProj)
+    console.log('projects service runnig: newProj in add project service', newProj)
 	  return knex.insert(newProj).into('projects').returning('*')
 	  	.then(rows => {
         return rows[0]
