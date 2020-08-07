@@ -221,13 +221,7 @@ io.on('connect', (client) => {
       }
       
     })
-<<<<<<< HEAD
-    //console.log('client closed chat window...', uid, title, email)
-=======
-    console.log('client closed chat window...', uid, title, email)
->>>>>>> 5552560... turn logs back on temporarily
-    console.log(`on disconnect sockets: ${JSON.stringify(sockets)}`)
-    //titles.splice(0, titles.length)
+   
   })
 
   client.on('disconnect', function () {
@@ -255,11 +249,6 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 
 async function verifyId(req, res, next) {
   console.log('verify id running')
-<<<<<<< HEAD
-   //console.log(`req._parsedOriginalUrl ${req._parsedOriginalUrl} req._parsedOriginalUrl.pathname ${req._parsedOriginalUrl.pathname} `)
-=======
-   console.log(`req._parsedOriginalUrl ${req._parsedOriginalUrl} req._parsedOriginalUrl.pathname ${req._parsedOriginalUrl.pathname} `)
->>>>>>> 5552560... turn logs back on temporarily
   if(req._parsedOriginalUrl !== undefined && req._parsedOriginalUrl.pathname !== '/socket.io/'){
     const idToken = req.headers.authorization
     console.log('verify id idToken', idToken)
