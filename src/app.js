@@ -251,7 +251,6 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 
 async function verifyId(req, res, next) {
   console.log('verify id running')
-   console.log(`req._parsedOriginalUrl ${req._parsedOriginalUrl} req._parsedOriginalUrl.pathname ${req._parsedOriginalUrl.pathname} `)
   if(req._parsedOriginalUrl !== undefined && req._parsedOriginalUrl.pathname !== '/socket.io/'){
     const idToken = req.headers.authorization
     console.log('verify id idToken', idToken)
