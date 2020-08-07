@@ -42,7 +42,7 @@ projectsRouter
     const show_hidden = false
     const newProj = { uid, title, author, logline, genre, projformat, budget, timeperiod, similarprojects, framework, visible, show_hidden }
     //const serialized = serializeProject(newProj)
-    console.log('serialized newProj in router', serialized)
+    //console.log('serialized newProj in router', serialized)
     
     ProjectsService.addProject(req.app.get('db'), serializeProject(newProj))
       .then(project => {
