@@ -21,7 +21,6 @@ const serializeCharacter = character => ({
 charactersRouter
   .route('/characters')
   .post(bodyParser, (req, res, next) => {
-    console.log('req.body', req.body)
     for(const field of ['project_name', 'name', 'age', 'gender', 'details']) {
       if(!req.body[field]) {
         logger.error(`${field} is required`)
@@ -43,7 +42,6 @@ charactersRouter
           })
         }
         const newChar = { uid, project_name, project_id, name, age, gender, details, shared }
-        console.log('newChar in router', newChar)
         CharactersService.addCharacter(req.app.get('db'), serializeCharacter(newChar))
           .then(character => {
             res.status(201)
@@ -63,7 +61,6 @@ charactersRouter
         CharactersService.getProjectCharacters(req.app.get('db'), project_id, req.uid, episode_id)
           .then(characters => {
             if(!characters) {
-              console.log(`Character for project ${project_id} not found`)
               return res.status(404).json({
                 error:{message: 'Character not found' }
               })
@@ -72,7 +69,7 @@ charactersRouter
           })
           .catch(next)
       } catch(e) {
-        console.log('error in characters router', e)
+        console.error('error in characters router', e)
       }
       
     })
@@ -82,10 +79,10 @@ charactersRouter
     .get((req, res, next) => {
       const { uid } = req
       const { project_id, episode_id } = req.params
-      console.log('shared characters router accessed project_id', project_id)
+      //console.log('shared characters router accessed project_id', project_id)
       CharactersService.getSharedCharacters(req.app.get('db'), uid, project_id, episode_id)
         .then(sharedCharacters => {
-          console.log('sharedCharacters', JSON.stringify(sharedCharacters))
+          //console.log('sharedCharacters', JSON.stringify(sharedCharacters))
           res.json(sharedCharacters)
         })
         .catch(next)
@@ -96,7 +93,7 @@ charactersRouter
     .route('/characters/:characterId')
     .delete((req, res, next) => {
         const { characterId } = req.params
-        console.log('character id in router', characterId)
+        //console.log('character id in router', characterId)
         CharactersService.deleteCharacter(req.app.get('db'), characterId, req.uid)
           .then(numRowsAffected => {
             logger.info(`Character with id ${characterId} deleted`)

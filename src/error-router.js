@@ -18,8 +18,7 @@ errorRouter
 .post(bodyParser, async (req, res, next) => {
     for(const field of ['name', 'email', 'error']) {
         if(!req.body[field]) {
-            console.log(`${field} is required`)
-            return res.status(400).send(`${field} is required`)
+          return res.status(400).send(`${field} is required`)
         } 
     }
 
@@ -27,7 +26,6 @@ errorRouter
     
     const errorReport = {name, email, error}
     const serializedErrRep = serializeError(errorReport)
-    console.log(`error report: ${JSON.stringify(serializedErrRep)}`)
     let transporter = nodemailer.createTransport({
           host: "email-smtp.us-west-2.amazonaws.com",
           port: 587,
@@ -39,7 +37,6 @@ errorRouter
         });
 
         transporter.verify(function(error, success) {
-           console.log('transporter verify running')
           if (error) {
              console.log(error);
           } else {

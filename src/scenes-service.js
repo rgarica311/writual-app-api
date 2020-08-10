@@ -1,7 +1,6 @@
 const ScenesService = {
 
     getProjectScenes(knex, project_id, uid, episode_id){
-        console.log(`scenes service params proj:${project_id} uid:${uid} episode_id: ${episode_id} typeof episode_id: ${typeof episode_id}`)
         if(episode_id !== 'undefined' && episode_id !== 'true' && episode_id !== 'null'){
             return knex.select('id', 'uid', 'project_name', 'project_id', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis').from('scenes').where({episode_id: episode_id, uid: uid}).orderBy('date_created', 'dsc')
         } else {
@@ -10,11 +9,7 @@ const ScenesService = {
     },
 
     getSharedScenes(knex, uid, project_id, episode_id) {
-        console.log('shared scenes service running uid:', uid)
-        console.log(`shared scenes service running project_id: ${project_id}`)
-        console.log(`shared scenes service running episode_id: ${episode_id} type ${typeof episode_id}`)
         if(episode_id !== 'undefined' && episode_id !== 'null') {
-            console.log('shared scenes get scenes for shared episode')
             return knex.raw(`select id, uid, project_name, project_id, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes 
                         where episode_id = '${episode_id}' 
                         and '${uid}' = any (shared) 
@@ -24,7 +19,6 @@ const ScenesService = {
                                 return obj.rows
                             })
         } else {
-            console.log(`shared scenes get scenes for projects`)
             return knex.raw(`select id, uid, project_name, project_id, act, step_name, scene_heading, thesis, antithesis, synthesis from scenes 
                         where project_id = '${project_id}' 
                         and '${uid}' = any (shared) 
@@ -38,7 +32,6 @@ const ScenesService = {
     },
 
     addScene(knex, newScene) {
-        console.log(`posting scene newScene: ${JSON.stringify(newScene)}`)
         return knex.insert(newScene).into('scenes').returning('*')
             .then(rows => {
                 return rows[0]
@@ -46,16 +39,12 @@ const ScenesService = {
     },
 
     deleteScene(knex, id, uid) {
-        console.log(`delete running id ${id}, uid ${uid}`)
         return knex('scenes').where({id: id, uid: uid}).delete()
     },
 
     async shareScenes(knex, uid, project_id, sharedUID, projFormat, title) {
         let result = await knex.select('shared').from('scenes').where({project_id: project_id, uid: uid})
-        console.log(`debug share project shareScenes service running: result ${JSON.stringify(result)}`)
         let prevSharedUID = result[0].shared[0]
-        console.log(`debug share project shareScenes service running: prevSharedUID ${prevSharedUID}`)
-        console.log(`debug projectshareScenes running: uid: ${uid}, project_id: ${project_id}, sharedUID: ${sharedUID}`)
         if(prevSharedUID !== sharedUID) {
             if(projFormat === 'Episode') {
                 try {
@@ -107,7 +96,6 @@ const ScenesService = {
     },
 
     getAllShared(knex, project_id, episode_id) {
-        console.log(`scenes getAllShared projectID: ${project_id} episode_id: ${episode_id} typeof episode_id: ${typeof episode_id}`)
         if(episode_id !== null) {
             return knex.raw(`with arrays as (
 	                    select shared, array_length(shared, 1) from scenes where episode_id = '${episode_id}'
