@@ -93,6 +93,7 @@ usersRouter
               "andrewsfray70@gmail.com",
               "michael.cumberbatch@gmail.com", 
               "erick@erickd.com",
+              "jkchat01@gmail.com"
             ]
       
       if(approvedEmails.includes(email)) {
