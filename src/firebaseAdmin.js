@@ -1,7 +1,5 @@
 const admin = require('firebase-admin');
 
-console.log('admin.credential.applicationDefault()', admin.credential.applicationDefault())
-
 admin.initializeApp({
   credential: admin.credential.cert({
     type: process.env.FIREBASE_TYPE,

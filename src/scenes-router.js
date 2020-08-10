@@ -24,13 +24,10 @@ scenesRouter
   .route('/scenes/:project_id/:episode_id')
   .get((req, res, next) => {
     try {
-      const { project_id, episode_id } = req.params
-      console.log(`type of episode_id: ${typeof episode_id} episode_id: ${episode_id}`)
-      
+      const { project_id, episode_id } = req.params      
       ScenesService.getProjectScenes(req.app.get('db'), project_id, req.uid, episode_id,)
         .then(scene => {
           if(!scene) {
-            console.log(`Scene for project ${scene} not found`)
             return res.status(404).json({
               error:{message: 'Scene not found' }
             })
@@ -39,16 +36,14 @@ scenesRouter
         })
         .catch(next)
     } catch(e) {
-      console.log('error in scenes get:', e)
+      console.error('error in scenes get:', e)
     }
       
   })
   
   .post(bodyParser, (req, res, next) => {
-    console.log('req.body scenes post route', req.uid)
     for(const field of ['project_name', 'act', 'step_name', 'scene_heading', 'thesis', 'antithesis', 'synthesis']) {
       if(!req.body[field]) {
-        console.log(`${field} is required`)
         return res.status(400).send(`${field} is required`)
       } 
     }
@@ -56,26 +51,19 @@ scenesRouter
     let { project_name, project_id, episode_id, act, step_name, scene_heading, thesis, antithesis, synthesis, uid, shared } = req.body
     if(uid === null) {
       uid = req.uid
-      console.log(`sharee: uid in in if: ${uid}`)
     } 
-    console.log(`sharee: uid after if: ${uid}`)
     
     ScenesService.getAllShared(req.app.get('db'), project_id, episode_id)
       .then(arrays => {
         if(arrays.rows.length > 0) {
-          console.log( `sharee arrays: ${JSON.stringify(arrays.rows[0].shared)}`)
           arrays.rows[0].shared.map(uid => {
             if(shared.includes(uid) !== true){
               shared.push(uid)
-              console.log(`sharee shared after push: ${shared}`)
             }
           })
         }
         
-        console.log(`sharee shared before newScene construction ${shared}`)
         const newScene = { uid, project_name, project_id, episode_id, act, step_name, scene_heading, thesis, antithesis, synthesis, shared }
-        console.log('newScene in router', newScene)
-        console.log('newScene serialized in router', serializeScene(newScene))
         ScenesService.addScene(req.app.get('db'), serializeScene(newScene))
           .then(scene => {
             
@@ -94,10 +82,8 @@ scenesRouter
     const { uid } = req
     const { project_id, episode_id } = req.params
     
-    console.log(`project_id in router ${project_id}`)
     ScenesService.getSharedScenes(req.app.get('db'), uid, project_id, episode_id)
       .then(sharedProjects => {
-        console.log('sharedProjects', JSON.stringify(sharedProjects))
         res.json(sharedProjects)
       })
       .catch(next)
@@ -108,10 +94,8 @@ scenesRouter
   .get((req, res, next) => {
     const { uid } = req
     const { project_id, current_act, current_step, search_term } = req.params
-    console.log(`scene search router req.params: ${JSON.stringify(req.params)}`)
     ScenesService.searchScenes(req.app.get('db'), uid, project_id, current_act, current_step, search_term)
       .then(scenes => {
-        console.log(`search results: ${JSON.stringify(scenes.rows)}`)
         res.json(scenes.rows)
       })
       .catch(next)
@@ -124,7 +108,6 @@ scenesRouter
     .delete((req, res, next) => {
         const { sceneId } = req.params
         const { uid } = req
-        console.log(`delete route  sceneid ${sceneId}, uid ${uid}`)
         ScenesService.deleteScene(req.app.get('db'), sceneId, uid)
           .then(numRowsAffected => {
             //logger.info(`Scene with id ${sceneId} delted`)

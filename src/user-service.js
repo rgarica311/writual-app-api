@@ -1,17 +1,14 @@
 const  UserService = {
   getUsers(knex) {
-	  console.log('get users running')
     return knex.select('*').from('users')
   },
 
   getUid(knex, email) {
-    console.log(`getUid service running email ${email}`)
     return knex.select('uid').from('users').where({email: email})
       .then(rows => {return rows[0]})
   },
 
   addUser (knex, loggedInUser) {
-    console.log('loggedInUser in add user service', loggedInUser)
     return knex.insert(loggedInUser).into('users').returning('*')
         .then(rows => {
             return rows[0]
@@ -19,7 +16,6 @@ const  UserService = {
   },
 
   verifyUserExists(knex, email) {
-    console.log(`verifyUserExists knex: ${knex}`)
     return knex('users').where({email: email})
   },
 
@@ -28,9 +24,7 @@ const  UserService = {
   },
 
   getMessageIconUrl(knex, sender_uid) {
-    console.log(`getMessageIconUrl service running sender_uid: ${sender_uid}`)
-    console.log(`select photo_url from users where uid = '${sender_uid}'`)
-    console.log(`knex: ${knex}`)
+   
     return knex.select('photo_url').from('users').where({uid: sender_uid})
      
   }

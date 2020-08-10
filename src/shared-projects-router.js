@@ -21,10 +21,8 @@ sharedProjectsRouter
     .route('/shared/projects')
     .get((req, res, next) => {
         const { uid } = req
-        console.log('shared projects router running')
         SharedProjectsService.getSharedProjects(req.app.get('db'), uid)
             .then(sharedProjects => {
-                console.log('sharedProjects', JSON.stringify(sharedProjects))
                 res.json(sharedProjects)
             })
             .catch(next)
@@ -61,7 +59,6 @@ sharedProjectsRouter
         .then(numRowsAffected => {
           SharedProjectsService.getHiddenSharedProjects(req.app.get('db'), uid)
             .then(projects => {
-              console.log(`projects.length in getHidden for unhide: ${projects.length}`)
               if(projects.length < 1){
                 SharedProjectsService.showHiddenSharedProjects(req.app.get('db'), uid, false)
                   .then(numRowsAffected => {
