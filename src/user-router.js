@@ -93,7 +93,9 @@ usersRouter
               "andrewsfray70@gmail.com",
               "michael.cumberbatch@gmail.com", 
               "erick@erickd.com",
-              "jkchat01@gmail.com"
+              "jkchat01@gmail.com",
+              "msudano408@gmail.com",
+              "marcthewriter@gmail.com"
             ]
       
       if(approvedEmails.includes(email)) {
