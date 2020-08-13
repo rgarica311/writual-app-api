@@ -7,7 +7,7 @@ const  ProjectsService = {
   getSharedWithUids(knex, uid, project_id, shared, isEpisode) {
     if(shared === 'false') {
       if(isEpisode === 'true') {
-        return knex.select('shared_with_uid').from('shared_episodes').where({shared_by_uid: uid,id: project_id})
+        return knex.select('shared_with_uid').from('shared_episodes').where({shared_by_uid: uid, id: project_id})
       } else {
           return knex.select('shared_with_uid').from('sharedprojects').where({shared_by_uid: uid, id: project_id})
       }
@@ -21,17 +21,16 @@ const  ProjectsService = {
     }
   },
 
-  test(knex, ids){
-    let queryStr = knex('users').where({uid: ids[0]})
+  getUrls(knex, ids){
+    let queryStr
     if(ids.length > 0){
+      queryStr = knex('users').where({uid: ids[0]})
       for(i=1; i<ids.length; i++){
         queryStr.orWhere({uid: ids[i]})
       }
     }
     return queryStr
   },
-
- 
 
   getSharedProjects(knex, uid) {
     return knex('projects').whereRaw(`'${uid}' = any (shared)`)

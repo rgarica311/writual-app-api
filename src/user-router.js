@@ -14,16 +14,13 @@ const usersRouter = express.Router();
 const bodyParser = express.json();
 const { AWS_PASS, AWS_USER } = require('./config')
 
-
+console.log(`amazon credentials: user ${AWS_USER} pass: ${AWS_PASS}`)
 const serializeuser = user => ({
   user_id: xss(user.user_id),
   user_name: xss(user.user_name),
   email: xss(user.logline),
   photo_url: user.genre,
 })
-
-
-
 
 usersRouter
   .route('/users')
@@ -39,26 +36,15 @@ usersRouter
     const { user_name, email, photo_url } = req.body
     const uid = req.uid
     const loggedInUser = { uid, user_name, email, photo_url }
+    res.locals.loggedInEmail = email
     try {
       UserService.getUsers(req.app.get('db'))
         .then(users => {
-<<<<<<< HEAD
-           console.log(`users in get users then: ${JSON.stringify(users)}`)
-          if(users.some(user => user.uid === loggedInUser.uid) === true){
-             console.log('same user')
-          } else {
-             console.log('new user')
-            UserService.addUser(req.app.get('db'), loggedInUser)
-              .then(user => {
-                 console.log('user', user)
-                 console.log(`user created with id ${user.id}`)
-=======
           if(users.some(user => user.uid === loggedInUser.uid) === true){
           } else {
             UserService.addUser(req.app.get('db'), loggedInUser)
               .then(user => {
-                 
->>>>>>> 5552560... turn logs back on temporarily
+                next()
                 res.status(201)
                 .json(serializeuser(user))
                 })
@@ -71,69 +57,99 @@ usersRouter
        console.error('error getting users', e)
     }
     
+  }, async (req, res, next) => {
+      try {
+        res.locals.sharedProjects = await SharedProjectsService.getSharedProjectsByEmail(req.app.get('db'), res.locals.loggedInEmail)
+        res.locals.sharedEpisodes = await SharedEpisodesService.getSharedEpisodesByEmail(req.app.get('db'), res.locals.loggedInEmail)
+        res.locals.sharedCharacters = await CharactersService.getSharedCharactersByEmail(req.app.get('db'), res.locals.loggedInEmail)
+        res.locals.sharedScenes = await ScenesService.getSharedScenesByEmail(req.app.get('db'), res.locals.loggedInEmail)
+
+        //console.log(`debug sharing sharedPrpojects: ${JSON.stringify(res.locals.sharedProjects)} sharedEpisodes: ${JSON.stringify(res.locals.sharedEpisodes)}`)
+        //console.log(`debug sharing sharedChar ${res.locals.sharedCharacters} shareScenes ${res.locals.sharedScenes}`)
+        if(res.locals.sharedProjects || res.locals.sharedEpisodes) {
+          next()
+        }
+
+      } catch(error) {
+        console.error('error checking for sharedProjects / sharedEpisodes', error)
+      }
+  }, async(req, res, next) => {
+    if(res.locals.sharedProjects) {
+      try {  
+        //change this to get projformat and if television check for has episodes and run addUID accordingly
+        SharedProjectsService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
+        res.locals.sharedProjects.map(proj => {
+          if(proj.projformat === 'Television') {
+            if(res.locals.sharedEpisodes) {
+              try {
+                SharedEpisodesService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
+              } catch (error) {
+                console.error('error adding uid to episode', error)
+              }
+            }
+
+          }
+        })
+      } catch(error) {
+        console.error('error adding uid to project', error)
+      }
+    } else {
+      try {
+        SharedEpisodesService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
+      } catch (error) {
+        console.error('error adding uid to episode', error)
+      }
+    }
+
+    if(res.locals.sharedCharacters) {
+      try {
+        CharactersService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
+      } catch(error) {
+        console.error(`error adding uid to characters ${error}`)
+      }
+    } else if(res.locals.sharedScenes) {
+      try {
+        ScenesService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
+      } catch(error) {
+        console.error(`error adding uid to scenes ${error}`)
+      }
+    }
   })
 
   usersRouter
     .route('/verify/user/:email/proj/:project_id/:projformat/:message/:permission')
     .get( async (req, res, next) => {
-       req.connection.setTimeout( 20000 )
+      req.connection.setTimeout( 20000 )
       const { email, project_id, projformat, message, permission } = req.params
+
       const { titles } = req.query
       
       const uid  = req.uid
       
-      let user
-<<<<<<< HEAD
-      if(email === 'rory.garcia1@gmail.com' || email === 'filmfan311@gmail.com' || email === 'rory@skylineandmanor.com' || email === 'sashatomlinson16@gmail.com') {
-=======
-
-      const approvedEmails = [
-              "rory.garcia1@gmail.com",
-              "filmfan311@gmail.com",
-              "rory@skylineandmanor.com",
-              "rory@rorydane.com",
-              "austin.adams04@gmail.com",
-              "marcuscharlesmusic@gmail.com",
-              "margeauxdupuy@gmail.com",
-              "sdawkins2292@gmail.com",
-              "johnnyattero@gmail.com",
-              "kevincobarrubia@gmail.com",
-              "ntschrader@gmail.com",
-              "nick@skylineandmanor.com",
-              "mox@skylineandmanor.com",
-              "j.michael.holder@gmail.com",
-              "ncastronuova@gmail.com",
-              "erickd7@gmail.com",
-              "ditomontiel@gmail.com",
-              "andrewsfray70@gmail.com",
-              "michael.cumberbatch@gmail.com", 
-              "erick@erickd.com",
-            ]
-      
-      if(approvedEmails.includes(email)) {
->>>>>>> 5552560... turn logs back on temporarily
-        try {
-          res.locals.userExists = await UserService.verifyUserExists(req.app.get('db'), email)
-        } catch(err) {
-          console.error(`error veryifying user: ${err}`)
-        }
-        if(res.locals.userExists){
-          next()
-        } else {
-            res.send('User does not exist')
-        }
-        
-      } else {
-         res.send('User does not exist')
+      try {
+        res.locals.userExists = await UserService.verifyUserExists(req.app.get('db'), email)
+        let sharee = await UserService.getDisplayName(req.app.get('db'), req.uid)
+        res.locals.sharee = sharee.user_name
+      } catch(err) {
+        console.error(`error veryifying user: ${err}`)
       }
+      next()
+      
+        
+      
     },
       async (req, res, next) => {
-        let user = res.locals.userExists
-        if(user[0].uid !== undefined && user[0].uid !== req.uid) {
-          res.locals.sharedUID = user[0].uid 
-          res.locals.projectToShare = await ProjectsService.getProjectToShare(req.app.get('db'), req.uid, req.params.project_id)
-          next()
+        if(res.locals.userExists.length > 0) {
+          let user = res.locals.userExists
+          if(user[0].uid !== undefined && user[0].uid !== req.uid) {
+            res.locals.sharedUID = user[0].uid 
+          } 
         }
+        
+        res.locals.projectToShare = await ProjectsService.getProjectToShare(req.app.get('db'), req.uid, req.params.project_id)
+
+        
+        next()
       },
       (req, res, next) => {
         
@@ -148,13 +164,21 @@ usersRouter
       },
       async (req, res, next) => {
         let { projectToShare, sharedUID } = res.locals
-        if(projectToShare.length > 0) {
-          projectToShare[0].visible = true
-          projectToShare[0].shared_by_uid = req.uid
-          projectToShare[0].shared_with_uid = sharedUID
-          projectToShare[0].permission = req.params.permission
-          res.locals.sharedProj = await SharedProjectsService.shareProject(req.app.get('db'), projectToShare)
-          next()
+        if(projectToShare !== undefined) {
+          if(projectToShare.length > 0) {
+            res.locals.projectName = projectToShare[0].title
+            projectToShare[0].visible = true
+            projectToShare[0].shared_by_uid = req.uid
+            if(sharedUID !== undefined) {
+              projectToShare[0].shared_with_uid = sharedUID
+            } else {
+              projectToShare[0].shared_with_email = req.params.email
+            }
+            projectToShare[0].permission = req.params.permission
+            res.locals.sharedProj = await SharedProjectsService.shareProject(req.app.get('db'), projectToShare)
+            next()
+          }
+          
         } else {
             next()
         }
@@ -173,17 +197,8 @@ usersRouter
                     
                     let project_id = episodeToShare[0].project_id
                     let result = await EpisodesService.getPermission(req.app.get('db'), project_id)
-<<<<<<< HEAD
-                     console.log(`debug share project: result permission ${JSON.stringify(result)}`)
-                    let permission = result[0].permission
-                     console.log(`project permission: ${permission}`)
-                    /*episodeToShare[0].visible = true
-                    episodeToShare[0].shared_by_uid = req.uid
-                    episodeToShare[0].shared_with_uid = res.locals.sharedUID*/
-=======
                     let permission = result[0].permission
                     
->>>>>>> 5552560... turn logs back on temporarily
 
                     clone = (obj) => Object.assign({}, obj);
 
@@ -195,21 +210,16 @@ usersRouter
                         clonedObj.visible = true
                         clonedObj.show_hidden = false
                         clonedObj.shared_by_uid = req.uid
-                        clonedObj.shared_with_uid = res.locals.sharedUID
+                        if(res.locals.sharedUID !== undefined) {
+                          clonedObj.shared_with_uid = res.locals.sharedUID
+                        } else {
+                          clonedObj.shared_with_email = req.params.email
+                        }
                         clonedObj.permission = req.params.permission
-<<<<<<< HEAD
-                         console.log(`clonedObj: ${JSON.stringify(clonedObj)}`)
-                        return clonedObj
-                    }
-                    let episode = renameKey(episodeToShare[0], 'uni_id', 'id')
-                     console.log(`debug set shared episode.id ${episode.id}`)
-                     console.log(`debug share project: shared episode ${JSON.stringify(episode)}`)
-=======
                         return clonedObj
                     }
                     let episode = renameKey(episodeToShare[0], 'uni_id', 'id')
                      
->>>>>>> 5552560... turn logs back on temporarily
                     EpisodesService.shareEpisode(req.app.get('db'), episode)
                       .then(ep => {
                          //console.log('shared ep', ep)
@@ -226,10 +236,6 @@ usersRouter
           }
           
         } else if(req.params.projformat === 'Television') {
-<<<<<<< HEAD
-            console.log('debug episode sharing: episode titles length:', res.locals.episodeTitles)
-=======
->>>>>>> 5552560... turn logs back on temporarily
             clone = (obj) => Object.assign({}, obj);
 
             renameKey = (object, key, newKey) => {
@@ -240,20 +246,17 @@ usersRouter
                 clonedObj.visible = true
                 clonedObj.show_hidden = false
                 clonedObj.shared_by_uid = req.uid
-                clonedObj.shared_with_uid = res.locals.sharedUID
+                if(res.locals.sharedUID !== undefined){
+                  clonedObj.shared_with_uid = res.locals.sharedUID
+                } else {
+                  clonedObj.shared_with_email = req.params.email
+                }
                 return clonedObj
             }
 
             let allEpisodes = await EpisodesService.getAllEpisodes(req.app.get('db'), req.uid, req.params.project_id)
-<<<<<<< HEAD
-            console.log(`debug episode sharing: allEpisodes: ${JSON.stringify(allEpisodes)}`)
             counter = 0
             allEpisodes.map( async episode => {
-              console.log(`individual episode: ${JSON.stringify(episode)}`)
-=======
-            counter = 0
-            allEpisodes.map( async episode => {
->>>>>>> 5552560... turn logs back on temporarily
               
               res.locals.shared = false
               let project_id = episode.project_id
@@ -261,13 +264,7 @@ usersRouter
               let permission
               try {
                 result = await EpisodesService.getPermission(req.app.get('db'), project_id)
-<<<<<<< HEAD
-                console.log(`project result all episodes: ${JSON.stringify(result)}`)
                 permission = result[0].permission
-                 console.log(`all episodes project permission: ${permission}`)
-=======
-                permission = result[0].permission
->>>>>>> 5552560... turn logs back on temporarily
               } catch (err) {
                  console.error(`error getting permissions: ${err}`)
               }
@@ -276,10 +273,6 @@ usersRouter
               episode.permission = req.params.permission
               delete episode.shared
               EpisodesService.shareEpisode(req.app.get('db'), renameKey(episode, 'uid', 'shared_by_uid'), counter++)
-<<<<<<< HEAD
-               console.log(`debug set shared allEpisodes episode.id ${episode.id} req.uid ${req.uid}`)
-=======
->>>>>>> 5552560... turn logs back on temporarily
               EpisodesService.setShared(req.app.get('db'), req.uid, episode.id)
                       .then(ep => {/*console.log(`set shared on episdeos`, ep)*/})
             }) 
@@ -290,17 +283,23 @@ usersRouter
         
         next()
       }, 
-      async (req, res, next) => {
-        let transporter = nodemailer.createTransport({
-          host: "email-smtp.us-west-2.amazonaws.com",
-          port: 587,
-          secure: false,   //upgrade later with STARTTLS
-          auth: {
-            user: AWS_USER,
-            pass: AWS_PASS
-          }
-        });
-
+      /*async (req, res, next) => {
+        let transporter
+        try {
+          transporter = nodemailer.createTransport({
+            host: "email-smtp.us-east-2.amazonaws.com",
+            port: 587,
+            secure: false,   //upgrade later with STARTTLS
+            auth: {
+              user: AWS_USER,
+              pass: AWS_PASS
+            }
+          });
+          console.log(`aws pass ${AWS_PASS} user ${AWS_USER}`)
+        } catch (error) {
+          console.error(`error creating transport ${error}`)
+        }
+        
         transporter.verify(function(error, success) {
            console.log('transporter verify running')
           if (error) {
@@ -309,40 +308,64 @@ usersRouter
              console.log("Server is ready to take our messages");
           }
         });
-
-        let info = await transporter.sendMail({
-          from: '"Writual" <notifications@writualapp.com>',   //sender address
-          to: req.params.email,   //list of receivers
-          subject: "New Writual Project Shared with You",   //Subject line
-          text: req.params.message,   //plain text body
-          //html: "<b>Hello world?</b>"   //html body
-        });
-
+        try {
+          console.log(`email config to: ${req.params.email} text: ${req.params.message}`)
+          
+        } catch (error) {
+          console.error(`error sending mail: ${error}`)
+        }
         next()
-      },
+      },*/
       (req, res, next) => {
         if(res.locals.episodeTitles.length > 0) {
           res.locals.episodeTitles.map(title => {
-            try {
-              ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
-                .then(rows => {
-                   //console.log(`rows updated: ${rows}`)
-                })
+            if(res.locals.sharedUID) {
+              try {
               
-            } catch (err) {
-                console.error(`error sharing scenes: ${err}`)
-            }
+                ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
+                  .then(rows => {
+                    //console.log(`rows updated: ${rows}`)
+                  })
+              
+              } catch (err) {
+                  console.error(`error sharing scenes: ${err}`)
+              }
 
-            try {
-              CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, title)
-                .then(rows => {
-                   //console.log(`rows updated: ${rows}`)
-                })
-              res.status(200).send()
-            } catch (err) {
-                console.error(`error sharing characters: ${err}`)
-            }
+              try {
+                CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
+                  .then(rows => {
+                    //console.log(`rows updated: ${rows}`)
+                  })
+                res.status(200).send()
+              } catch (err) {
+                  console.error(`error sharing characters: ${err}`)
+              }
 
+            } else {
+
+                try {
+              
+                  ScenesService.shareScenesByEmail(req.app.get('db'), req.uid, req.params.email, req.params.project_id, req.params.projformat, title)
+                    .then(rows => {
+                      //console.log(`rows updated: ${rows}`)
+                    })
+                
+                } catch (err) {
+                    console.error(`error sharing scenes: ${err}`)
+                }
+
+                try {
+                  CharactersService.shareCharactersByEmail(req.app.get('db'), req.uid, req.params.email, req.params.project_id, title)
+                    .then(rows => {
+                      //console.log(`rows updated: ${rows}`)
+                    })
+                  res.status(200).send()
+                } catch (err) {
+                    console.error(`error sharing characters: ${err}`)
+                }
+
+              }
+            
           })
         } else {
           next()
@@ -352,24 +375,48 @@ usersRouter
         
       },
       (req, res, next) => {
-        try {
-          ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
-            .then(rows => {
-               //console.log(`rows updated: ${rows}`)
-            })
-          
-        } catch (err) {
-            console.error(`error sharing scenes: ${err}`)
+        //alter these tables to accept sha
+        if(res.locals.sharedUID) {
+          try {
+            ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
+              .then(rows => {
+                //console.log(`rows updated: ${rows}`)
+              })
+            
+          } catch (err) {
+              console.error(`error sharing scenes: ${err}`)
+          }
+          try {
+            CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID)
+              .then(rows => {
+                //console.log(`rows updated: ${rows}`)
+              })
+            res.status(200).send()
+          } catch (err) {
+            console.error(`error sharing characters: ${err}`)
+          }
+        } else {
+            try {
+              ScenesService.shareScenesByEmail(req.app.get('db'), req.uid, req.params.email, req.params.project_id, req.params.projformat, title)
+                .then(rows => {
+                  //console.log(`rows updated: ${rows}`)
+                })
+            
+            } catch (err) {
+                console.error(`error sharing scenes: ${err}`)
+            }
+
+            try {
+              CharactersService.shareCharactersByEmail(req.app.get('db'), req.uid, req.params.email, req.params.project_id, title)
+                .then(rows => {
+                  //console.log(`rows updated: ${rows}`)
+                })
+              res.status(200).send()
+            } catch (err) {
+                console.error(`error sharing characters: ${err}`)
+            }
         }
-        try {
-          CharactersService.shareCharacters(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID)
-            .then(rows => {
-               //console.log(`rows updated: ${rows}`)
-            })
-          res.status(200).send()
-        } catch (err) {
-          console.error(`error sharing characters: ${err}`)
-        }
+        
         
     })
         

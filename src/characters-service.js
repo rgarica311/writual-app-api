@@ -11,6 +11,11 @@ const CharactersService = {
             }) 
     },
 
+    getSharedCharactersByEmail(knex, email) {
+        return knex('characters').select('*').where({shared_with_email: email})
+            .then(rows => {return rows[0]})
+    },
+
     addCharacter(knex, newChar) {
         return knex.insert(newChar).into('characters').returning('*')
             .then(rows => {
@@ -24,23 +29,49 @@ const CharactersService = {
 
     async shareCharacters (knex, uid, project_id, sharedUID, title) {
         let result = await knex.select('shared').from('characters').where({project_id: project_id, uid: uid})
-        let prevSharedUID = result[0].shared[0]
-        if(prevSharedUID !== sharedUID && title !== 'null' ) {
-            
-            return knex.raw(`UPDATE characters 
-                        SET shared = shared || '{${sharedUID}}' 
-                        where project_id = '${project_id}' 
-                        AND
-                        project_name = '${title}'
-                        AND
-                        uid = '${uid}'`)
-        } else {
-            return knex.raw(`UPDATE characters 
-                        SET shared = shared || '{${sharedUID}}' 
-                        where project_id = '${project_id}' 
-                        AND
-                        uid = '${uid}'`)
+        if(result.length > 0) {
+            let prevSharedUID = result[0].shared[0]
+            if(prevSharedUID !== sharedUID && title !== 'null' ) {
+                return knex.raw(`UPDATE characters 
+                            SET shared = shared || '{${sharedUID}}' 
+                            where project_id = '${project_id}' 
+                            AND
+                            project_name = '${title}'
+                            AND
+                            uid = '${uid}'`)
+            } else {
+                return knex.raw(`UPDATE characters 
+                            SET shared = shared || '{${sharedUID}}' 
+                            where project_id = '${project_id}' 
+                            AND
+                            uid = '${uid}'`)
+            }
         }
+        
+        
+    },
+
+    addUid(knex, uid, email) {
+        console.log(`debug sharing: CharactersService.addUid running`)
+        return knex.raw(`update characters
+                        SET shared = shared || '{${uid}}'
+                        where 
+                        shared_with_email = '${email}'
+        `)
+    },
+
+    async shareCharactersByEmail (knex, uid, email, project_id, sharedUID, title) {
+        let result = await knex.select('shared').from('characters').where({project_id: project_id, uid: uid})
+        if(result.length > 0) {
+            let prevSharedUID = result[0].shared[0]
+            if(prevSharedUID !== sharedUID && title !== 'null' ) {
+                return knex('characters').where({project_id: project_id, project_name: title, uid: uid}).update({shared_with_email: email})
+                        
+            } else {
+                return knex('characters').where({project_id: project_id, uid: uid}).update({shared_with_email: email})
+            }
+        }
+        
         
     },
 
