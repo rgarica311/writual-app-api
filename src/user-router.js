@@ -64,8 +64,8 @@ usersRouter
         res.locals.sharedCharacters = await CharactersService.getSharedCharactersByEmail(req.app.get('db'), res.locals.loggedInEmail)
         res.locals.sharedScenes = await ScenesService.getSharedScenesByEmail(req.app.get('db'), res.locals.loggedInEmail)
 
-        console.log(`debug sharing sharedPrpojects: ${JSON.stringify(res.locals.sharedProjects)} sharedEpisodes: ${JSON.stringify(res.locals.sharedEpisodes)}`)
-        console.log(`debug sharing sharedChar ${res.locals.sharedCharacters} shareScenes ${res.locals.sharedScenes}`)
+        //console.log(`debug sharing sharedPrpojects: ${JSON.stringify(res.locals.sharedProjects)} sharedEpisodes: ${JSON.stringify(res.locals.sharedEpisodes)}`)
+        //console.log(`debug sharing sharedChar ${res.locals.sharedCharacters} shareScenes ${res.locals.sharedScenes}`)
         if(res.locals.sharedProjects || res.locals.sharedEpisodes) {
           next()
         }
@@ -75,7 +75,6 @@ usersRouter
       }
   }, async(req, res, next) => {
     if(res.locals.sharedProjects) {
-      console.log(`debug sharing: SharedProjectsService.addUid should run`)
       try {  
         //change this to get projformat and if television check for has episodes and run addUID accordingly
         SharedProjectsService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
@@ -95,7 +94,6 @@ usersRouter
         console.error('error adding uid to project', error)
       }
     } else {
-      console.log(`debug sharing: SharedEpisodesService.addUid should run`)
       try {
         SharedEpisodesService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
       } catch (error) {
@@ -105,13 +103,11 @@ usersRouter
 
     if(res.locals.sharedCharacters) {
       try {
-        console.log(`debug sharing: CharactersService.addUid should run`)
         CharactersService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
       } catch(error) {
         console.error(`error adding uid to characters ${error}`)
       }
     } else if(res.locals.sharedScenes) {
-      console.log(`debug sharing: ScenesService.addUid should run`)
       try {
         ScenesService.addUid(req.app.get('db'), req.uid, res.locals.loggedInEmail).then()
       } catch(error) {
@@ -126,7 +122,6 @@ usersRouter
       req.connection.setTimeout( 20000 )
       const { email, project_id, projformat, message, permission } = req.params
 
-      console.log(`debug sharing message: ${message}`)
       const { titles } = req.query
       
       const uid  = req.uid
@@ -135,8 +130,6 @@ usersRouter
         res.locals.userExists = await UserService.verifyUserExists(req.app.get('db'), email)
         let sharee = await UserService.getDisplayName(req.app.get('db'), req.uid)
         res.locals.sharee = sharee.user_name
-        console.log(`debug sharing res.locals.userExists: ${res.locals.userExists.length}`)
-        console.log(`sharee ${JSON.stringify(res.locals.sharee)}`)
       } catch(err) {
         console.error(`error veryifying user: ${err}`)
       }
@@ -171,14 +164,12 @@ usersRouter
       },
       async (req, res, next) => {
         let { projectToShare, sharedUID } = res.locals
-        console.log(`debug sharing projectToShare: ${JSON.stringify(projectToShare)}`)
         if(projectToShare !== undefined) {
           if(projectToShare.length > 0) {
             res.locals.projectName = projectToShare[0].title
             projectToShare[0].visible = true
             projectToShare[0].shared_by_uid = req.uid
             if(sharedUID !== undefined) {
-              console.log(`debug sharing: sharedUID: ${sharedUID}`)
               projectToShare[0].shared_with_uid = sharedUID
             } else {
               projectToShare[0].shared_with_email = req.params.email
@@ -330,7 +321,6 @@ usersRouter
       (req, res, next) => {
         if(res.locals.episodeTitles.length > 0) {
           res.locals.episodeTitles.map(title => {
-            console.log(`req.uid in episodes middleware ${req.uid}`)
             if(res.locals.sharedUID) {
               try {
               
@@ -389,7 +379,6 @@ usersRouter
       (req, res, next) => {
         //alter these tables to accept sha
         if(res.locals.sharedUID) {
-          console.log(`req.uid in projects midware ${req.uid}`)
           try {
             ScenesService.shareScenes(req.app.get('db'), req.uid, req.params.project_id, res.locals.sharedUID, req.params.projformat, title)
               .then(rows => {
