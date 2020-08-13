@@ -27,6 +27,11 @@ const  UserService = {
    
     return knex.select('photo_url').from('users').where({uid: sender_uid})
      
+  },
+
+  getDisplayName(knex, uid) {
+    return knex.select('user_name').from('users').where({uid: uid})
+      .then(rows => {return rows[0]})
   }
 }
 

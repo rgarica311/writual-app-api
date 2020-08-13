@@ -74,30 +74,38 @@ projectsRouter
     const sharedBy = []
     let ids
     
-    ProjectsService.getSharedWithUids(req.app.get('db'), req.uid, project_id, shared, episode)
-    .then(sharedWithUids => {
-      sharedWithUids.map(obj => {
-        if(obj.shared_with_uid !== undefined) {
-            sharedWith.push(obj.shared_with_uid)
-        } else {
-            sharedBy.push(obj.shared_by_uid)
-        }
-      })
-      
-      if(sharedWith.length > 0) {
-        ids = sharedWith
-      } else {
-          ids = sharedBy
-      }
-      ProjectsService.test(req.app.get('db'), ids)
-        .then(photoUrl => {
-          res.json(photoUrl)
+    try {
+      ProjectsService.getSharedWithUids(req.app.get('db'), req.uid, project_id, shared, episode)
+        .then(sharedWithUids => {
+          console.log(`getIconUrls: sharedWithUids: ${JSON.stringify(sharedWithUids)}`)
+          sharedWithUids.map(obj => {
+            if(obj.shared_with_uid !== undefined) {
+                sharedWith.push(obj.shared_with_uid)
+            } else {
+                sharedBy.push(obj.shared_by_uid)
+            }
+          })
+          
+          if(sharedWith.length > 0) {
+            ids = sharedWith
+          } else {
+              ids = sharedBy
+          }
+          ProjectsService.getUrls(req.app.get('db'), ids)
+            .then(photoUrl => {
+              console.log(`getIconUrls: photoUrl: ${photoUrl}`)
+              res.json(photoUrl)
+            })
+        
+          //res.json(sharedWithUids)
+          
         })
-     
-      //res.json(sharedWithUids)
-      
-    })
-    .catch(next)
+        .catch(next)
+
+    } catch (error) {
+      console.error(`error getting icon url ${error}`)
+    }
+    
     
 
   })

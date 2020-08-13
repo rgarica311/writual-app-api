@@ -8,6 +8,19 @@ const SharedProjectsService = {
         return knex('sharedprojects').where({shared_with_uid: uid})
     },
 
+    getSharedProjectsByEmail(knex, email) {
+        return knex('sharedprojects').where({shared_with_email: email})
+    },
+
+    addUid(knex, uid, email){
+        console.log(`debug sharing: SharedProjectsService.addUid running uid ${uid} email: ${email}`)
+        return knex('sharedprojects').where({shared_with_email: email}).update({shared_with_uid: uid})
+    },
+
+    removeEmail(knex, email){
+        return knex('sharedprojects').where({shared_with_email: email}).update({shared_with_email: null})
+    },
+
    async shareProject(knex, projToShare) {
         let sharedProjects  = await knex.select('id', 'shared_by_uid', 'shared_with_uid').from('sharedprojects').where({shared_by_uid: projToShare[0].shared_by_uid})
         //let sharedProjects = result[0]

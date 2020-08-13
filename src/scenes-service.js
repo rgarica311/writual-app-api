@@ -44,35 +44,75 @@ const ScenesService = {
 
     async shareScenes(knex, uid, project_id, sharedUID, projFormat, title) {
         let result = await knex.select('shared').from('scenes').where({project_id: project_id, uid: uid})
-        let prevSharedUID = result[0].shared[0]
-        if(prevSharedUID !== sharedUID) {
-            if(projFormat === 'Episode') {
-                try {
-                    return knex.raw(`UPDATE scenes 
-                                SET shared = shared || '{${sharedUID}}' 
-                                where episode_id = '${project_id}' 
-                                AND
-                                project_name = '${title}'
-                                AND
-                                uid = '${uid}'`)
+        if(result.length > 0) {
+            let prevSharedUID = result[0].shared[0]
+            if(prevSharedUID !== sharedUID) {
+                if(projFormat === 'Episode') {
+                    try {
+                        return knex.raw(`UPDATE scenes 
+                                    SET shared = shared || '{${sharedUID}}' 
+                                    where episode_id = '${project_id}' 
+                                    AND
+                                    project_name = '${title}'
+                                    AND
+                                    uid = '${uid}'`)
 
-                } catch (err) {
-                    console.error(`error with sharing scenes service: ${err}`)
-                }
+                    } catch (err) {
+                        console.error(`error with sharing scenes service: ${err}`)
+                    }
 
-            } else {
-                try {
-                    return knex.raw(`UPDATE scenes 
-                                SET shared = shared || '{${sharedUID}}' 
-                                where project_id = '${project_id}' 
-                                AND
-                                uid = '${uid}'`)
+                } else {
+                    try {
+                        return knex.raw(`UPDATE scenes 
+                                    SET shared = shared || '{${sharedUID}}' 
+                                    where project_id = '${project_id}' 
+                                    AND
+                                    uid = '${uid}'`)
 
-                } catch (err) {
-                    console.error(`error with sharing scenes service: ${err}`)
+                    } catch (err) {
+                        console.error(`error with sharing scenes service: ${err}`)
+                    }
                 }
             }
         }
+        
+        
+    },
+
+    addUid(knex, uid, email) {
+        console.log(`debug sharing: ScenesService.addUid running`)
+        return knex.raw(`update scenes
+                        SET shared = shared || '{${uid}}'
+                        where 
+                        shared_with_email = '${email}'
+        `)
+    },
+
+    async shareScenesByEmail(knex, uid, email, project_id, projFormat, title) {
+        let result = await knex.select('shared').from('scenes').where({project_id: project_id, uid: uid})
+        console.log(`shareScenesByEmail result of select: ${JSON.stringify(result)}`)
+        if(result.length > 0) {
+            let prevSharedUID = result[0].shared[0]
+            if(prevSharedUID !== sharedUID) {
+                if(projFormat === 'Episode') {
+                    try {
+                        return knex('scenes').where({episode_id: project_id, uid: uid}).update({shared_with_email: email})
+
+                    } catch (err) {
+                        console.error(`error with sharing scenes service: ${err}`)
+                    }
+
+                } else {
+                    try {
+                        return knex('scenes').where({project_id: project_id, uid: uid}).update({shared_with_email: email})
+
+                    } catch (err) {
+                        console.error(`error with sharing scenes service: ${err}`)
+                    }
+                }
+            }
+        }
+        
         
     },
 
@@ -108,7 +148,12 @@ const ScenesService = {
                         select shared from arrays order by array_length desc limit 1`)
         }
         
-    }
+    },
+
+    getSharedScenesByEmail(knex, email) {
+        return knex('scenes').select('*').where({shared_with_email: email})
+            .then(rows => {return rows[0]})
+    },
 
 }
 

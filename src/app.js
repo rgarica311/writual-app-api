@@ -101,7 +101,10 @@ io.on('connect', (client) => {
   client.on('project-shared', email => {
     UserService.getUid(app.get('db'), email)
       .then(uid => {
-        client.broadcast.emit('project-shared', uid)
+        if(uid !== undefined) {
+            client.broadcast.emit('project-shared', uid)
+
+        } 
       })
   })
 
