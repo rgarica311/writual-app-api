@@ -54,7 +54,7 @@ projectsRouter
 projectsRouter
   .route('/projects')
   .get((req, res, next) => {
-    console.log('req.uid in router:', req.uid)
+ 
     let sess = req.session
     const { uid } = req
     ProjectsService.getUserProjects(req.app.get('db'), uid)
