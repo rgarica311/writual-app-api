@@ -6,7 +6,6 @@ const ProjectsService = require('./projects-service');
 const ScenesService = require('./scenes-service');
 const CharactersService = require('./characters-service');
 const projectsRouter = express.Router();
-const admin = require('firebase-admin');
 
 
 const serializeProject = project => ({

@@ -15,11 +15,11 @@ const scenesRouter = require('./scenes-router')
 const userRouter = require('./user-router')
 const sharedProjectsRouter = require('./shared-projects-router')
 const sharedEpisodesRouter = require('./shared-episodes-router')
-const messagesRouter = require('./messages-router')
 const detailsRouter = require('./details-router')
 const treatmentsRouter = require('./treatment-router')
 const errorRouter = require('./error-router')
 const feedbackRouter = require('./feedback-router')
+const userFeedbackRouter = require('./user_feedback-router')
 const app = express()
 const admin = require('./firebaseAdmin');
 const bodyParser = express.json();
@@ -283,6 +283,7 @@ app.use(detailsRouter);
 app.use(treatmentsRouter);
 app.use(errorRouter);
 app.use(feedbackRouter);
+app.use(userFeedbackRouter);
 
 
 app.use((error, req, res, next) => {

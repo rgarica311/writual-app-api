@@ -283,13 +283,13 @@ usersRouter
         
         next()
       }, 
-      /*async (req, res, next) => {
+      async (req, res, next) => {
         let transporter
         try {
           transporter = nodemailer.createTransport({
-            host: "email-smtp.us-east-2.amazonaws.com",
-            port: 587,
-            secure: false,   //upgrade later with STARTTLS
+            host: "email-smtp.us-west-2.amazonaws.com",
+            port: 465,
+            secure: true,   //upgrade later with STARTTLS
             auth: {
               user: AWS_USER,
               pass: AWS_PASS
@@ -315,7 +315,7 @@ usersRouter
           console.error(`error sending mail: ${error}`)
         }
         next()
-      },*/
+      },
       (req, res, next) => {
         if(res.locals.episodeTitles.length > 0) {
           res.locals.episodeTitles.map(title => {
