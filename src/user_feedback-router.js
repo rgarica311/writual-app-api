@@ -48,7 +48,7 @@ user_feedbackRouter
         });
 
         let info = transporter.sendMail({
-          from: notifications@writualapp.com,   //sender address
+          from: 'notifications@writualapp.com',   //sender address
           to: 'feedback@writualapp.com',   //list of receivers
           subject: `Feedback from ${serializedUserFeedback.name}`,   //Subject line
           text: serializedUserFeedback.title + ' ' + serializedUserFeedback.description + ' ' + serializedUserFeedback.email,   //plain text body
