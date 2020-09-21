@@ -24,6 +24,17 @@ const serializeEpisode = episode => ({
   show_hidden: episode.show_hidden
 })
 
+const serializeUpdatedEpisode = episode => ({
+  episode_title: xss(episode.title),
+  author: xss(episode.author),
+  logline: xss(pepisode.logline),
+  genre: episode.genre,
+  projformat: episode.projformat,
+  budget: xss(episode.budget),
+  timeperiod: xss(episode.timeperiod),
+  similarepisodes: xss(episode.similarepisodes),
+})
+
 episodesRouter 
     .route('/episodes')
     .get((req, res, next) => {
@@ -55,6 +66,19 @@ episodesRouter
         })
         .catch(next)
     })
+
+episodesRouter
+  .route('/episodes')
+  .put(bodyParser, (req, res, next) => {
+    console.log(`req.body: ${JSON.stringify(req.body)}`)
+
+    EpisodesService.updateEpisode(req.app.get('db'), serializeUpdatedEpisode(req.body), req.body.uni_id )
+      .then(project => {
+        res.status(201)
+        .json(project)
+      })
+      .catch(next)
+  })
 
 episodesRouter
     .route('/episodes/:episodeid')

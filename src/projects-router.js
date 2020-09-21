@@ -23,6 +23,19 @@ const serializeProject = project => ({
   show_hidden: project.show_hidden
 })
 
+const serializeUpdatedProject = project => ({
+  title: xss(project.title),
+  author: xss(project.author),
+  logline: xss(project.logline),
+  genre: project.genre,
+  projformat: project.projformat,
+  budget: xss(project.budget),
+  timeperiod: xss(project.timeperiod),
+  similarprojects: xss(project.similarprojects),
+})
+
+
+
 projectsRouter
   .route('/projects')
   .post(bodyParser, (req, res, next) => {
@@ -47,6 +60,19 @@ projectsRouter
       .catch(next)
         
 })
+
+projectsRouter
+  .route('/projects')
+  .put(bodyParser, (req, res, next) => {
+    console.log(`req.body: ${JSON.stringify(req.body)}`)
+
+    ProjectsService.updateProject(req.app.get('db'), serializeUpdatedProject(req.body), req.body.id )
+      .then(project => {
+        res.status(201)
+        .json(project)
+      })
+      .catch(next)
+  })
 
 
 

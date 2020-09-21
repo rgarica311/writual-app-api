@@ -36,6 +36,11 @@ const  ProjectsService = {
     return knex('projects').whereRaw(`'${uid}' = any (shared)`)
   },
 
+  updateProject(knex, project, id) {
+    console.log('update project')
+    return knex('projects').where({id: id}).update({title: project.title, author: project.author, logline: project.logline, genre: project.genre, projformat: project.projformat, budget: project.budget, timeperiod: project.timeperiod, similarprojects: project.similarprojects})
+  },
+
   setShared(knex, uid, project_id) {
     return knex('projects').update({shared: true}).where({uid: uid, id: project_id})
   },

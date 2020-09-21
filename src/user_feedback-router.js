@@ -55,6 +55,8 @@ user_feedbackRouter
           //html: "<b>Hello world?</b>"   //html body
         });
 
+        res.status(200).send()
+
     } catch (error) {
       console.error('error:', error)
     }

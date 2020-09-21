@@ -46,6 +46,11 @@ const EpisodesService = {
                         uid = '${uid}'`)
     },
 
+    updateEpisode(knex, episode, id) {
+        console.log('update episode')
+        return knex('episodes').where({id: id}).update({episode_title: episode.title, author: episode.author, logline: episode.logline, genre: episode.genre, projformat: episode.projformat, budget: episode.budget, timeperiod: episode.timeperiod, similarepisodes: episode.similarepisodes})
+    },
+
 
     getEpisodes(knex, uid, title) {
         return knex('episodes').where({uid: uid }).orderBy('date_created', 'dsc')

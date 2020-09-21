@@ -7,6 +7,14 @@ feedbackRouter
     .route('/feedback')
     .post(bodyParser, (req, res, next) => {
         const updatedFeedback = req.body
+        const blocks = updatedFeedback.feedback.blocks
+        blocks.map(block => {
+            if(block.text.includes("'")) {
+                let index = blocks.indexOf(block)
+                updatedFeedback.feedback.blocks[index].text = updatedFeedback.feedback.blocks[index].text.replace("'", "''")
+            }
+        })
+
         FeedbackService.getFeedback(req.app.get('db'), updatedFeedback.project_id, updatedFeedback.episode_id, updatedFeedback.reviewer)
             .then(async feedback => {
                 let response = await feedback

@@ -47,7 +47,16 @@ detailsRouter
     .route('/details/:detail/:character/:proj_id')
     .put(bodyParser, (req, res, next) => {
         const {detail, character, proj_id} = req.params
-        let raw  = req.body
+        const raw  = req.body
+        const blocks = raw[detail].blocks
+
+        blocks.map(block => {
+            if(block.text.includes("'")) {
+                let index = blocks.indexOf(block)
+                raw[detail].blocks[index].text = raw[detail].blocks[index].text.replace("'", "''")
+            }
+        })
+
         DetailsService.updateDetail(req.app.get('db'), detail, character, proj_id, raw)
             .then(numRowsAffected => {
                 res.status(204).send
